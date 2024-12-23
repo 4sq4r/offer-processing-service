@@ -14,20 +14,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MerchantController {
 
-    private final MerchantService merchantService;
+    private final MerchantService service;
 
     @PostMapping
     public MerchantDTO saveOne(@RequestBody @Valid MerchantDTO dto) throws CustomException {
-        return merchantService.saveOne(dto);
+        return service.saveOne(dto);
     }
 
     @GetMapping("/{id}")
     public MerchantDTO getOne(@PathVariable UUID id) throws CustomException {
-        return merchantService.getOne(id);
+        return service.getOne(id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteOne(@PathVariable UUID id) throws CustomException {
-        merchantService.deleteOne(id);
+        service.deleteOne(id);
     }
 }

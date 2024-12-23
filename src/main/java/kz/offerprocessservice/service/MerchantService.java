@@ -52,7 +52,7 @@ public class MerchantService {
         return name;
     }
 
-    private MerchantEntity findEntityById(UUID id) throws CustomException {
+    public MerchantEntity findEntityById(UUID id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)

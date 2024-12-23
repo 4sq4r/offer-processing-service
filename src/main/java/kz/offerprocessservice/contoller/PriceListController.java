@@ -15,10 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/price-lists/v1")
 public class PriceListController {
 
-    private final PriceListService priceListService;
+    private final PriceListService service;
 
     @PostMapping
     public PriceListDTO upload(@RequestPart MultipartFile file) throws CustomException {
-        return priceListService.uploadPriceList(file);
+        return service.uploadPriceList(file);
     }
 }
