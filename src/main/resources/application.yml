@@ -12,9 +12,11 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
+
       ddl-auto: update
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
 minio:
   url: http://localhost:9000
   bucket: offer-processing
