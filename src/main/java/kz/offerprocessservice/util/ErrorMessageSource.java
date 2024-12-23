@@ -1,7 +1,9 @@
 package kz.offerprocessservice.util;
 
 public enum ErrorMessageSource {
-    MINIO_BUCKET_NOT_EXIST("Minio bucket not exists.");
+    MINIO_BUCKET_NOT_EXIST("Minio bucket not exists."),
+    CITY_ALREADY_EXISTS("City already exists: %s"),
+    CITY_NOT_FOUND("City not found: %s");
 
     private String text;
 
