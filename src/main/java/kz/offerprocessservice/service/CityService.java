@@ -52,7 +52,7 @@ public class CityService {
         return name;
     }
 
-    private CityEntity findEntityById(UUID id) throws CustomException {
+    public CityEntity findEntityById(UUID id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)

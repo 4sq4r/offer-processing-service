@@ -5,7 +5,9 @@ public enum ErrorMessageSource {
     CITY_ALREADY_EXISTS("City already exists: %s"),
     CITY_NOT_FOUND("City not found: %s"),
     MERCHANT_NOT_FOUND("Merchant not found: %s"),
-    MERCHANT_ALREADY_EXISTS("Merchant already exists: %s");
+    MERCHANT_ALREADY_EXISTS("Merchant already exists: %s"),
+    POINT_OF_SALE_ALREADY_EXISTS("Point of sale already exists: %s"),
+    POINT_OF_SALE_NOT_FOUND("Point of sale not found: %s");
 
     private String text;
 
