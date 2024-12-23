@@ -1,10 +1,10 @@
 package kz.offerprocessservice.service;
 
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.mapper.CityMapper;
-import kz.offerprocessservice.model.dto.CityDTO;
-import kz.offerprocessservice.model.entity.CityEntity;
-import kz.offerprocessservice.repository.CityRepository;
+import kz.offerprocessservice.mapper.MerchantMapper;
+import kz.offerprocessservice.model.dto.MerchantDTO;
+import kz.offerprocessservice.model.entity.MerchantEntity;
+import kz.offerprocessservice.repository.MerchantRepository;
 import kz.offerprocessservice.util.ErrorMessageSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,27 +16,27 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CityService {
+public class MerchantService {
 
-    private final CityRepository repository;
-    private final CityMapper mapper;
+    private final MerchantRepository repository;
+    private final MerchantMapper mapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public CityDTO saveOne(CityDTO dto) throws CustomException {
+    public MerchantDTO saveOne(MerchantDTO dto) throws CustomException {
         dto.setName(validateName(dto.getName()));
-        CityEntity entity = mapper.toEntity(dto);
+        MerchantEntity entity = mapper.toEntity(dto);
         repository.save(entity);
 
         return mapper.toDTO(entity);
     }
 
-    public CityDTO getOne(UUID id) throws CustomException {
+    public MerchantDTO getOne(UUID id) throws CustomException {
         return mapper.toDTO(findEntityById(id));
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void deleteOne(UUID id) throws CustomException {
-        repository.delete(findEntityById(id));
+        MerchantEntity entity = findEntityById(id);
+        repository.delete(entity);
     }
 
     private String validateName(String name) throws CustomException {
@@ -45,18 +45,18 @@ public class CityService {
         if (repository.existsByNameIgnoreCase(name)) {
             throw CustomException.builder()
                     .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.CITY_ALREADY_EXISTS.getText(name))
+                    .message(ErrorMessageSource.MERCHANT_ALREADY_EXISTS.getText(name))
                     .build();
         }
 
         return name;
     }
 
-    private CityEntity findEntityById(UUID id) throws CustomException {
+    private MerchantEntity findEntityById(UUID id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.CITY_NOT_FOUND.getText(id.toString()))
+                        .message(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id.toString()))
                         .build()
         );
     }
