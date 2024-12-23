@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,6 +41,12 @@ public class PointOfSaleService {
 
     public PointOfSaleDTO getOne(UUID id) throws CustomException {
         return mapper.toDTO(findEntityById(id));
+    }
+
+    public List<String> getAllPosNames(UUID id) {
+        return repository.findAllByMerchantId(id).stream()
+                .sorted()
+                .toList();
     }
 
     @Transactional(rollbackFor = Exception.class)

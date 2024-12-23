@@ -6,13 +6,16 @@ import kz.offerprocessservice.model.dto.PriceListDTO;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.repository.PriceListRepository;
+import kz.offerprocessservice.util.FileUtils;
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Service
@@ -28,6 +31,7 @@ public class PriceListService {
     private final PriceListRepository priceListRepository;
     private final MinioService minioService;
     private final PriceListMapper priceListMapper;
+    private final PointOfSaleService pointOfSaleService;
 
     @Transactional(rollbackFor = Exception.class)
     public PriceListDTO uploadPriceList(MultipartFile file) throws CustomException {
@@ -46,5 +50,10 @@ public class PriceListService {
         priceListRepository.save(entity);
 
         return priceListMapper.toDTO(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<byte[]> downloadTemplate(UUID id) throws IOException {
+        return FileUtils.getPriceListTemplate(pointOfSaleService.getAllPosNames(id));
     }
 }
