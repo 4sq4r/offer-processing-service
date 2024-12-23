@@ -1,11 +1,11 @@
 package kz.offerprocessservice.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.UUID;
 
 @Data
 @Entity
@@ -15,8 +15,13 @@ public class PriceListEntity extends BaseEntity {
 
     @Column(nullable = false, updatable = false)
     private String name;
+    @Column(name = "original_name", nullable = false, updatable = false)
+    private String originalName;
     @Column(nullable = false, updatable = false)
     private String url;
+    @Column(name = "merchant_id", nullable = false)
+    private UUID merchantId;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private PriceListStatus status;
 }

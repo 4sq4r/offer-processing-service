@@ -16,7 +16,7 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 minio:
-  url: http://localhost/9000
+  url: http://localhost:9000
   bucket: offer-processing
   access-key: root
   secret-key: az2RGrBK08LV
