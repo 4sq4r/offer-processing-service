@@ -32,7 +32,7 @@ public class PriceListService {
     private final PriceListRepository priceListRepository;
     private final MinioService minioService;
     private final PriceListMapper priceListMapper;
-    private final PointOfSaleService pointOfSaleService;
+    private final WarehouseService warehouseService;
 
     @Transactional(rollbackFor = Exception.class)
     public PriceListDTO uploadPriceList(UUID merchantId,MultipartFile file) throws CustomException {
@@ -55,7 +55,7 @@ public class PriceListService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<byte[]> downloadTemplate(UUID id) throws IOException {
-        return FileUtils.getPriceListTemplate(pointOfSaleService.getAllPosNames(id));
+        return FileUtils.getPriceListTemplate(warehouseService.getAllPosNames(id));
     }
 
     public Set<PriceListEntity> findNewPriceLists() {

@@ -6,9 +6,9 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-@Table(name = "points_of_sales")
+@Table(name = "warehouses")
 @EqualsAndHashCode(callSuper = true)
-public class PointOfSaleEntity extends BaseEntity {
+public class WarehouseEntity extends BaseEntity {
 
     @Column(nullable = false)
     private String name;

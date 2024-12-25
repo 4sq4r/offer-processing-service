@@ -2,27 +2,27 @@ package kz.offerprocessservice.contoller;
 
 import jakarta.validation.Valid;
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.model.dto.PointOfSaleDTO;
-import kz.offerprocessservice.service.PointOfSaleService;
+import kz.offerprocessservice.model.dto.WarehouseDTO;
+import kz.offerprocessservice.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/points-of-sales/v1")
+@RequestMapping("/warehouses/v1")
 @RequiredArgsConstructor
-public class PointOfSaleController {
+public class WarehouseController {
 
-    private final PointOfSaleService service;
+    private final WarehouseService service;
 
     @PostMapping
-    public PointOfSaleDTO saveOne(@RequestBody @Valid PointOfSaleDTO dto) throws CustomException {
+    public WarehouseDTO saveOne(@RequestBody @Valid WarehouseDTO dto) throws CustomException {
         return service.saveOne(dto);
     }
 
     @GetMapping("/{id}")
-    public PointOfSaleDTO getOne(@PathVariable UUID id) throws CustomException {
+    public WarehouseDTO getOne(@PathVariable UUID id) throws CustomException {
         return service.getOne(id);
     }
 
