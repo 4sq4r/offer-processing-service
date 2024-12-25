@@ -24,4 +24,6 @@ public class PriceListEntity extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PriceListStatus status;
+    @Column(name = "fail_reason")
+    private String failReason;
 }

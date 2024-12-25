@@ -13,10 +13,10 @@ public interface PointOfSaleRepository extends JpaRepository<PointOfSaleEntity, 
     boolean existsByNameIgnoreCaseAndMerchantId(String name, UUID merchantId);
 
     @Query(nativeQuery = true,
-    value = """
-            select name
-            from points_of_sales
-            where merchant_id = :merchantId
-            """)
+            value = """
+                    select name
+                    from points_of_sales
+                    where merchant_id = :merchantId
+                    """)
     Set<String> findAllByMerchantId(UUID merchantId);
 }
