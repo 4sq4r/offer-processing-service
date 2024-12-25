@@ -18,9 +18,10 @@ public class PriceListController {
 
     private final PriceListService service;
 
-    @PostMapping
-    public PriceListDTO upload(@RequestPart MultipartFile file) throws CustomException {
-        return service.uploadPriceList(file);
+    @PostMapping("/{merchantId}")
+    public PriceListDTO upload(@PathVariable UUID merchantId,
+                               @RequestPart MultipartFile file) throws CustomException {
+        return service.uploadPriceList(merchantId, file);
     }
 
     @GetMapping("/{id}/template")

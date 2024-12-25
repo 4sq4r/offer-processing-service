@@ -12,7 +12,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-
       ddl-auto: update
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -26,5 +25,10 @@ minio:
   write-timeout: 60000
   read-timeout: 10000
 
+  prefix-to-delete: /s3/offer-processing
   price-lists-folder: /s3/offer-processing/price-lists
   price-lists-url: /price-lists
+
+logging:
+  level:
+    org.hibernate.orm.connections.pooling: error

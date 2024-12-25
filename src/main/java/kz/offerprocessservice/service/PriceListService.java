@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -24,9 +25,9 @@ import java.util.UUID;
 public class PriceListService {
 
     @Value("${minio.price-lists-folder}")
-    private String PRICE_LIST_FOLDER_NAME;
+    private String priceListFolderName;
     @Value("${minio.price-lists-url}")
-    private String MINIO_URL;
+    private String actualMinioUrl;
 
     private final PriceListRepository priceListRepository;
     private final MinioService minioService;
@@ -34,19 +35,19 @@ public class PriceListService {
     private final PointOfSaleService pointOfSaleService;
 
     @Transactional(rollbackFor = Exception.class)
-    public PriceListDTO uploadPriceList(MultipartFile file) throws CustomException {
+    public PriceListDTO uploadPriceList(UUID merchantId,MultipartFile file) throws CustomException {
         String[] split = file.getOriginalFilename().split("\\.");
         String salt = UUID.randomUUID().toString();
         String fileName = salt + "." + split[split.length - 1];
-        String url = StringUtils.MINIO_FILE_FORMAT.formatted(PRICE_LIST_FOLDER_NAME, fileName);
-        minioService.uploadFile(file, StringUtils.MINIO_FILE_FORMAT.formatted(MINIO_URL, fileName));
+        String url = StringUtils.MINIO_FILE_FORMAT.formatted(priceListFolderName, fileName);
+        minioService.uploadFile(file, StringUtils.MINIO_FILE_FORMAT.formatted(actualMinioUrl, fileName));
 
         PriceListEntity entity = new PriceListEntity();
         entity.setName(fileName);
-        entity.setMerchantId(UUID.randomUUID());
+        entity.setMerchantId(merchantId);
         entity.setOriginalName(file.getOriginalFilename());
         entity.setUrl(url);
-        entity.setStatus(PriceListStatus.UPLOADED);
+        entity.setStatus(PriceListStatus.NEW);
         priceListRepository.save(entity);
 
         return priceListMapper.toDTO(entity);
@@ -55,5 +56,14 @@ public class PriceListService {
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<byte[]> downloadTemplate(UUID id) throws IOException {
         return FileUtils.getPriceListTemplate(pointOfSaleService.getAllPosNames(id));
+    }
+
+    public Set<PriceListEntity> findNewPriceLists() {
+        return priceListRepository.findAllNewPriceLists();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public PriceListEntity updateStatus(PriceListEntity entity) {
+        return priceListRepository.save(entity);
     }
 }

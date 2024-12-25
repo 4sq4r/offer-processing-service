@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +43,11 @@ public class PointOfSaleService {
         return mapper.toDTO(findEntityById(id));
     }
 
-    public List<String> getAllPosNames(UUID id) {
-        return repository.findAllByMerchantId(id).stream()
+    public Set<String> getAllPosNames(UUID id) {
+        return repository.findAllByMerchantId(id)
+                .stream()
                 .sorted()
-                .toList();
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Transactional(rollbackFor = Exception.class)
