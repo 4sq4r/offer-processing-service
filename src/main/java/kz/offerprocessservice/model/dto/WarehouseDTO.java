@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PointOfSaleDTO extends BaseDTO {
+public class WarehouseDTO extends BaseDTO {
 
     @NotNull
     private String name;
