@@ -7,7 +7,9 @@ public enum ErrorMessageSource {
     MERCHANT_NOT_FOUND("Merchant not found: %s"),
     MERCHANT_ALREADY_EXISTS("Merchant already exists: %s"),
     POINT_OF_SALE_ALREADY_EXISTS("Point of sale already exists: %s"),
-    POINT_OF_SALE_NOT_FOUND("Point of sale not found: %s"), SKU_NOT_FOUND("Sku not found: %s");
+    POINT_OF_SALE_NOT_FOUND("Point of sale not found: %s"),
+    SKU_NOT_FOUND("Sku not found: %s"),
+    PRICE_LIST_NOT_FOUND("Price list not found: %s");
 
     private String text;
 
