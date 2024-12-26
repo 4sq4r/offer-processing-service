@@ -55,7 +55,7 @@ public class PriceListService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<byte[]> downloadTemplate(UUID id) throws IOException {
-        return FileUtils.getPriceListTemplate(warehouseService.getAllPosNames(id));
+        return FileUtils.getPriceListTemplate(warehouseService.getAllWarehouseNamesByMerchantId(id));
     }
 
     public Set<PriceListEntity> findNewPriceLists() {

@@ -43,8 +43,16 @@ public class WarehouseService {
         return mapper.toDTO(findEntityById(id));
     }
 
-    public Set<String> getAllPosNames(UUID id) {
-        return repository.findAllByMerchantId(id)
+    public Set<WarehouseEntity> getAllWarehousesByMerchantId(UUID id) {
+        if (merchantService.existsById(id)) {
+            return repository.findAllByMerchantId(id);
+        }
+
+        return new HashSet<>();
+    }
+
+    public Set<String> getAllWarehouseNamesByMerchantId(UUID id) {
+        return repository.findAllNamesByMerchantId(id)
                 .stream()
                 .sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));

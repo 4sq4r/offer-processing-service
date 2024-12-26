@@ -1,9 +1,9 @@
 package kz.offerprocessservice.scheduler;
 
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.model.entity.MerchantEntity;
-import kz.offerprocessservice.model.entity.OfferEntity;
-import kz.offerprocessservice.model.entity.PriceListEntity;
+import kz.offerprocessservice.model.dto.PriceListItemDTO;
+import kz.offerprocessservice.model.entity.*;
+import kz.offerprocessservice.model.enums.OfferStatus;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.service.*;
 import kz.offerprocessservice.util.FileUtils;
@@ -14,30 +14,36 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class PriceListScheduler {
 
-    @Value("${minio.prefix-to-delete}")
-    private String minioPrefixToDelete;
-
     private final OfferService offerService;
+    private final StockService stockService;
     private final MerchantService merchantService;
     private final MinioService minioService;
     private final PriceListService priceListService;
     private final WarehouseService warehouseService;
+
+    @Value("${minio.prefix-to-delete}")
+    private String minioPrefixToDelete;
+
+
     private final ExecutorService validationExecutor = Executors.newFixedThreadPool(2);
     private final ExecutorService processingExecutor = Executors.newFixedThreadPool(2);
     private final BlockingQueue<PriceListEntity> validationQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<PriceListEntity> processingQueue = new LinkedBlockingQueue<>();
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 30000)
     public void scheduleValidation() {
         Set<PriceListEntity> priceLists = priceListService.findNewPriceLists();
 
@@ -77,7 +83,7 @@ public class PriceListScheduler {
     }
 
     private boolean validate(PriceListEntity priceList) throws CustomException {
-        Set<String> pos = warehouseService.getAllPosNames(priceList.getMerchantId());
+        Set<String> pos = warehouseService.getAllWarehouseNamesByMerchantId(priceList.getMerchantId());
         InputStream is = minioService.getFile(priceList.getUrl().replaceFirst(minioPrefixToDelete, ""));
         String failReason = null;
         PriceListStatus status;
@@ -135,9 +141,69 @@ public class PriceListScheduler {
     }
 
     private void processOffers(InputStream is, MerchantEntity me) throws IOException {
-        Set<OfferEntity> set = FileUtils.extractOffers(is, me);
-        if (!set.isEmpty()) {
-            offerService.saveAll(set);
+        System.out.println("Starting extract items from file");
+        Set<PriceListItemDTO> priceListItems = FileUtils.extractPriceListItems(is);
+
+        if (!priceListItems.isEmpty()) {
+            Set<OfferEntity> offers = collectOffers(priceListItems, me);
+
+            if (!offers.isEmpty()) {
+                Map<String, WarehouseEntity> warehouseMap = warehouseService.getAllWarehousesByMerchantId(me.getId()).stream()
+                        .collect(Collectors.toMap(WarehouseEntity::getName, wh -> wh));
+                collectStocks(priceListItems, offers, warehouseMap);
+            }
         }
     }
+
+    private Set<OfferEntity> collectOffers(Set<PriceListItemDTO> priceListItems, MerchantEntity me) {
+        if (!priceListItems.isEmpty()) {
+            Set<OfferEntity> offers = priceListItems.stream().map(item -> {
+                OfferEntity offer = new OfferEntity();
+                offer.setOfferName(item.getOfferName());
+                offer.setOfferCode(item.getOfferCode());
+                offer.setMerchant(me);
+                offer.setStatus(OfferStatus.NEW);
+
+                return offer;
+            }).collect(Collectors.toSet());
+
+            if (!offers.isEmpty()) {
+                offerService.saveAll(offers);
+            }
+
+            return offers;
+        }
+
+        return new HashSet<>();
+    }
+
+    private void collectStocks(Set<PriceListItemDTO> priceListItems,
+                                           Set<OfferEntity> offers,
+                                           Map<String, WarehouseEntity> warehouseMap) {
+        Set<StockEntity> stocks = new HashSet<>();
+        priceListItems.forEach(item -> {
+            OfferEntity offerEntity = offers.stream()
+                    .filter(o -> o.getOfferCode().equals(item.getOfferCode()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Offer not found after saving"));
+            Map<String, Integer> stockMap = item.getStocks();
+            stockMap.forEach((warehouseName, stockValue) -> {
+                WarehouseEntity wh = warehouseMap.get(warehouseName);
+
+                if (wh != null) {
+                    StockEntity stock = new StockEntity();
+                    stock.setStock(stockValue);
+                    stock.setWarehouse(wh);
+                    stock.setOffer(offerEntity);
+                    stocks.add(stock);
+                }
+            });
+        });
+
+        if (!stocks.isEmpty()) {
+            stockService.saveAll(stocks);
+        }
+    }
+
+
 }
