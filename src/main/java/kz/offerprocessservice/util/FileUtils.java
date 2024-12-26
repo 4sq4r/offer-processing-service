@@ -1,9 +1,8 @@
 package kz.offerprocessservice.util;
 
-import kz.offerprocessservice.model.entity.MerchantEntity;
-import kz.offerprocessservice.model.entity.OfferEntity;
-import kz.offerprocessservice.model.enums.OfferStatus;
+import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -18,9 +17,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.*;
 
+@Slf4j
 @NoArgsConstructor
 public class FileUtils {
 
@@ -80,37 +79,51 @@ public class FileUtils {
         }
     }
 
-    public static Set<OfferEntity> extractOffers(InputStream is, MerchantEntity merchantEntity) throws IOException {
+    public static Set<PriceListItemDTO> extractPriceListItems(InputStream is) throws IOException {
         try (Workbook wb = new XSSFWorkbook(is)) {
-            Set<OfferEntity> offers = new HashSet<>();
             Sheet sheet = wb.getSheetAt(0);
-            Set<String> uniqueOffers = new HashSet<>();
+            Map<Integer, String> headerCellMap = new HashMap<>();
+            Set<PriceListItemDTO> result = new HashSet<>();
 
-            for (int i = 1; i < sheet.getLastRowNum(); i++) {
-                Row r = sheet.getRow(i);
+            for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+                Row row = sheet.getRow(rowIndex);
 
-                if (isRowEmpty(r)) {
+                if (isRowEmpty(row)) {
                     continue;
                 }
 
-                String code = getStringCellValue(r.getCell(0));
-                String name = getStringCellValue(r.getCell(1));
-                String uniqueKey = code + ":" + name;
+                if (rowIndex == 0) {
+                    for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+                        headerCellMap.put(cellIndex, getStringCellValue(row.getCell(cellIndex)));
+                    }
+                } else {
+                    PriceListItemDTO priceListItemDTO = new PriceListItemDTO();
+                    Map<String, Integer> stocks = new HashMap<>();
 
-                if (StringUtils.isBlank(code) || StringUtils.isBlank(name) || uniqueOffers.contains(uniqueKey)) {
-                    continue;
+                    for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+                        String headerCellName = headerCellMap.get(cellIndex);
+                        String cellValue = getStringCellValue(row.getCell(cellIndex));
+
+                        if (Objects.equals(headerCellName, OFFER_CODE)) {
+                            priceListItemDTO.setOfferCode(getStringCellValue(row.getCell(cellIndex)));
+                        } else if (Objects.equals(headerCellName, OFFER_NAME)) {
+                            priceListItemDTO.setOfferName(getStringCellValue(row.getCell(cellIndex)));
+                        } else {
+                            try {
+                                int stock = Integer.parseInt(cellValue);
+                                stocks.put(headerCellName, stock);
+                            } catch (NumberFormatException e) {
+                                log.info(e.getMessage());
+                            }
+                        }
+                    }
+
+                    priceListItemDTO.setStocks(stocks);
+                    result.add(priceListItemDTO);
                 }
-
-                uniqueOffers.add(uniqueKey);
-                OfferEntity e = new OfferEntity();
-                e.setMerchant(merchantEntity);
-                e.setStatus(OfferStatus.NEW);
-                e.setOfferCode(code);
-                e.setOfferName(name);
-                offers.add(e);
             }
 
-            return offers;
+            return result;
         }
     }
 
@@ -128,6 +141,7 @@ public class FileUtils {
 
         return false;
     }
+
     private static String getStringCellValue(Cell c) {
         if (c == null) {
             return null;
@@ -135,7 +149,7 @@ public class FileUtils {
 
         return switch (c.getCellType()) {
             case STRING -> c.getStringCellValue().trim();
-            case NUMERIC -> BigDecimal.valueOf(c.getNumericCellValue()).toPlainString();
+            case NUMERIC -> String.valueOf(Math.round(c.getNumericCellValue()));
             default -> null;
         };
     }

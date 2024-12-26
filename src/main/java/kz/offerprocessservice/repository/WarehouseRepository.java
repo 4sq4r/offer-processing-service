@@ -15,8 +15,10 @@ public interface WarehouseRepository extends JpaRepository<WarehouseEntity, UUID
     @Query(nativeQuery = true,
             value = """
                     select name
-                    from points_of_sales
+                    from warehouses
                     where merchant_id = :merchantId
                     """)
-    Set<String> findAllByMerchantId(UUID merchantId);
+    Set<String> findAllNamesByMerchantId(UUID merchantId);
+
+    Set<WarehouseEntity> findAllByMerchantId(UUID merchantId);
 }
