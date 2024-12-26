@@ -1,22 +1,25 @@
 package kz.offerprocessservice.service;
 
+import kz.offerprocessservice.event.FileUploadedEvent;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.mapper.PriceListMapper;
 import kz.offerprocessservice.model.dto.PriceListDTO;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.repository.PriceListRepository;
+import kz.offerprocessservice.util.ErrorMessageSource;
 import kz.offerprocessservice.util.FileUtils;
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -33,9 +36,10 @@ public class PriceListService {
     private final MinioService minioService;
     private final PriceListMapper priceListMapper;
     private final WarehouseService warehouseService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(rollbackFor = Exception.class)
-    public PriceListDTO uploadPriceList(UUID merchantId,MultipartFile file) throws CustomException {
+    public PriceListDTO uploadPriceList(UUID merchantId, MultipartFile file) throws CustomException {
         String[] split = file.getOriginalFilename().split("\\.");
         String salt = UUID.randomUUID().toString();
         String fileName = salt + "." + split[split.length - 1];
@@ -49,6 +53,7 @@ public class PriceListService {
         entity.setUrl(url);
         entity.setStatus(PriceListStatus.NEW);
         priceListRepository.save(entity);
+        eventPublisher.publishEvent(new FileUploadedEvent(this, entity.getId()));
 
         return priceListMapper.toDTO(entity);
     }
@@ -58,8 +63,14 @@ public class PriceListService {
         return FileUtils.getPriceListTemplate(warehouseService.getAllWarehouseNamesByMerchantId(id));
     }
 
-    public Set<PriceListEntity> findNewPriceLists() {
-        return priceListRepository.findAllNewPriceLists();
+    @Transactional(rollbackFor = Exception.class)
+    public PriceListEntity findEntityById(UUID id) throws CustomException {
+        return priceListRepository.findById(id).orElseThrow(
+                () -> CustomException.builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message(ErrorMessageSource.PRICE_LIST_NOT_FOUND.getText(id.toString()))
+                        .build()
+        );
     }
 
     @Transactional(rollbackFor = Exception.class)
