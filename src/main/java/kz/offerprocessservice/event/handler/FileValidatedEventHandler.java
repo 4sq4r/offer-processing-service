@@ -1,4 +1,4 @@
-package kz.offerprocessservice.handler;
+package kz.offerprocessservice.event.handler;
 
 import kz.offerprocessservice.event.FileValidatedEvent;
 import kz.offerprocessservice.exception.CustomException;
@@ -7,7 +7,8 @@ import kz.offerprocessservice.model.entity.*;
 import kz.offerprocessservice.model.enums.OfferStatus;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.service.*;
-import kz.offerprocessservice.util.FileUtils;
+import kz.offerprocessservice.strategy.file.processing.FileProcessStrategy;
+import kz.offerprocessservice.strategy.file.processing.FileProcessorStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,11 +46,12 @@ public class FileValidatedEventHandler {
         parse(ple);
     }
 
-    private void parse(PriceListEntity ple) throws CustomException, IOException {
-        InputStream is = minioService.getFile(ple.getUrl()
+    private void parse(PriceListEntity priceListEntity) throws CustomException, IOException {
+        InputStream inputStream = minioService.getFile(priceListEntity.getUrl()
                 .replaceFirst(minioPrefixToDelete, ""));
-        MerchantEntity me = merchantService.findEntityById(ple.getMerchantId());
-        Set<PriceListItemDTO> priceListItems = FileUtils.extractPriceListItems(is);
+        MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchantId());
+        FileProcessStrategy fileProcessStrategy = FileProcessorStrategyFactory.getStrategy(priceListEntity.getName());
+        Set<PriceListItemDTO> priceListItems = fileProcessStrategy.extract(inputStream);
 
         if (!priceListItems.isEmpty()) {
             Set<OfferEntity> offers = saveOffers(priceListItems, me);
@@ -61,19 +63,19 @@ public class FileValidatedEventHandler {
             }
         }
 
-        ple.setStatus(PriceListStatus.PROCESSED);
-        priceListService.updateStatus(ple);
-        log.info("Price list successfully parsed: {}", ple.getId());
+        priceListEntity.setStatus(PriceListStatus.PROCESSED);
+        priceListService.updateStatus(priceListEntity);
+        log.info("Price list successfully parsed: {}", priceListEntity.getId());
     }
 
-    private Set<OfferEntity> saveOffers(Set<PriceListItemDTO> pli, MerchantEntity me) {
-        if (!pli.isEmpty()) {
-            log.info("Started parse offers from price list items. List items count: {}", pli.size());
-            Set<OfferEntity> offers = pli.stream().map(item -> {
+    private Set<OfferEntity> saveOffers(Set<PriceListItemDTO> priceListItemSet, MerchantEntity merchantEntity) {
+        if (!priceListItemSet.isEmpty()) {
+            log.info("Started parse offers from price list items. List items count: {}", priceListItemSet.size());
+            Set<OfferEntity> offers = priceListItemSet.stream().map(item -> {
                 OfferEntity offer = new OfferEntity();
                 offer.setOfferName(item.getOfferName());
                 offer.setOfferCode(item.getOfferCode());
-                offer.setMerchant(me);
+                offer.setMerchant(merchantEntity);
                 offer.setStatus(OfferStatus.NEW);
 
                 return offer;
@@ -90,24 +92,24 @@ public class FileValidatedEventHandler {
         return new HashSet<>();
     }
 
-    private void saveStocks(Set<PriceListItemDTO> pli,
+    private void saveStocks(Set<PriceListItemDTO> priceListItemDTO,
                             Set<OfferEntity> offers,
                             Map<String, WarehouseEntity> warehouseMap) {
-        log.info("Started parse stocks from price list items. List items count: {}", pli.size());
+        log.info("Started parse stocks from price list items. List items count: {}", priceListItemDTO.size());
         Set<StockEntity> stocks = new HashSet<>();
-        pli.forEach(item -> {
+        priceListItemDTO.forEach(item -> {
             OfferEntity offerEntity = offers.stream()
                     .filter(o -> o.getOfferCode().equals(item.getOfferCode()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Offer not found after saving"));
             Map<String, Integer> stockMap = item.getStocks();
             stockMap.forEach((warehouseName, stockValue) -> {
-                WarehouseEntity wh = warehouseMap.get(warehouseName);
+                WarehouseEntity warehouse = warehouseMap.get(warehouseName);
 
-                if (wh != null) {
+                if (warehouse != null) {
                     StockEntity stock = new StockEntity();
                     stock.setStock(stockValue);
-                    stock.setWarehouse(wh);
+                    stock.setWarehouse(warehouse);
                     stock.setOffer(offerEntity);
                     stocks.add(stock);
                 }

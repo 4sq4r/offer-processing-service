@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -17,7 +16,7 @@ public class OfferService {
     private final OfferRepository repository;
 
     @Transactional(rollbackFor = Exception.class)
-    public Set<OfferEntity> saveAll(Set<OfferEntity> set) {
-        return new HashSet<>(repository.saveAll(set));
+    public void saveAll(Set<OfferEntity> set) {
+        repository.saveAll(set);
     }
 }
