@@ -1,15 +1,16 @@
-package kz.offerprocessservice.handler;
+package kz.offerprocessservice.event.handler;
 
 import kz.offerprocessservice.event.FileUploadedEvent;
 import kz.offerprocessservice.event.FileValidatedEvent;
 import kz.offerprocessservice.exception.CustomException;
+import kz.offerprocessservice.strategy.file.validation.FileValidationStrategyFactory;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.processor.FileUploadProcessor;
 import kz.offerprocessservice.service.MinioService;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.WarehouseService;
-import kz.offerprocessservice.util.FileUtils;
+import kz.offerprocessservice.strategy.file.validation.FileValidationStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,13 +55,14 @@ public class FileUploadedEventHandler {
 
     }
 
-    private boolean validate(PriceListEntity priceList) throws CustomException {
-        Set<String> pos = warehouseService.getAllWarehouseNamesByMerchantId(priceList.getMerchantId());
+    private boolean validate(PriceListEntity priceListEntity) throws CustomException {
+        Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(priceListEntity.getMerchantId());
+        FileValidationStrategy validationStrategy = FileValidationStrategyFactory.getStrategy(priceListEntity.getName());
         String failReason = null;
         PriceListStatus status;
 
-        try (InputStream is = minioService.getFile(priceList.getUrl().replaceFirst(minioPrefixToDelete, ""));) {
-            if (FileUtils.validatePriceList(is, pos)) {
+        try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl().replaceFirst(minioPrefixToDelete, ""))) {
+            if (validationStrategy.validate(inputStream, warehouseNames)) {
                 status = PriceListStatus.VALIDATED;
             } else {
                 failReason = "Incorrect headers.";
@@ -71,9 +73,9 @@ public class FileUploadedEventHandler {
             status = PriceListStatus.VALIDATION_FAILED;
         }
 
-        priceList.setStatus(status);
-        priceList.setFailReason(failReason);
-        priceListService.updateStatus(priceList);
+        priceListEntity.setStatus(status);
+        priceListEntity.setFailReason(failReason);
+        priceListService.updateStatus(priceListEntity);
 
         return status == PriceListStatus.VALIDATED;
     }
