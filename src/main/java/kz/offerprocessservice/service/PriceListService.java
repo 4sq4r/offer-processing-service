@@ -5,10 +5,12 @@ import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.mapper.PriceListMapper;
 import kz.offerprocessservice.model.dto.PriceListDTO;
 import kz.offerprocessservice.model.entity.PriceListEntity;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.repository.PriceListRepository;
+import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategyFactory;
 import kz.offerprocessservice.util.ErrorMessageSource;
-import kz.offerprocessservice.util.FileUtils;
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -59,8 +62,11 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<byte[]> downloadTemplate(UUID id) throws IOException {
-        return FileUtils.getPriceListTemplate(warehouseService.getAllWarehouseNamesByMerchantId(id));
+    public ResponseEntity<byte[]> downloadTemplate(UUID merchantId, FileFormat format) throws IOException {
+        FileTemplatingStrategy strategy = FileTemplatingStrategyFactory.getStrategy(format);
+        Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
+
+        return strategy.generate(warehouseNames);
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -2,6 +2,7 @@ package kz.offerprocessservice.contoller;
 
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.dto.PriceListDTO;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.service.PriceListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,8 @@ public class PriceListController {
         return service.uploadPriceList(merchantId, file);
     }
 
-    @GetMapping("/{id}/template")
-    public ResponseEntity<byte[]> downloadPriceListTemplate(@PathVariable UUID id) throws IOException {
-        return service.downloadTemplate(id);
+    @GetMapping("/{merchantId}/template")
+    public ResponseEntity<byte[]> downloadPriceListTemplate(@PathVariable UUID merchantId, @RequestParam FileFormat format) throws IOException {
+        return service.downloadTemplate(merchantId, format);
     }
 }
