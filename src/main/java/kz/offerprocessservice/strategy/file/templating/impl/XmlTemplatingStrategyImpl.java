@@ -22,8 +22,6 @@ import java.util.Set;
 public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) {
-        warehouseNames.remove(FileUtils.OFFER_NAME);
-        warehouseNames.remove(FileUtils.OFFER_CODE);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {

@@ -4,6 +4,7 @@ import kz.offerprocessservice.event.FileUploadedEvent;
 import kz.offerprocessservice.event.FileValidatedEvent;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.entity.PriceListEntity;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.processor.FileUploadProcessor;
 import kz.offerprocessservice.service.MinioService;
@@ -58,9 +59,13 @@ public class FileUploadedEventHandler {
 
     private boolean validate(PriceListEntity priceListEntity) throws CustomException {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(priceListEntity.getMerchantId());
-        warehouseNames.add(FileUtils.OFFER_CODE);
-        warehouseNames.add(FileUtils.OFFER_NAME);
         FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(priceListEntity.getFormat());
+
+        if (!priceListEntity.getFormat().equals(FileFormat.XML)) {
+            warehouseNames.add(FileUtils.OFFER_CODE);
+            warehouseNames.add(FileUtils.OFFER_NAME);
+        }
+
         String failReason = null;
         PriceListStatus status;
 
@@ -68,7 +73,7 @@ public class FileUploadedEventHandler {
             if (validationStrategy.validate(inputStream, warehouseNames)) {
                 status = PriceListStatus.VALIDATED;
             } else {
-                failReason = "Incorrect headers.";
+                failReason = "Incorrect warehouse names.";
                 status = PriceListStatus.VALIDATION_FAILED;
             }
         } catch (Exception e) {
