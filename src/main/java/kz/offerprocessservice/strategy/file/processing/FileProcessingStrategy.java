@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-public interface FileProcessStrategy {
+public interface FileProcessingStrategy {
 
     Set<PriceListItemDTO> extract(InputStream inputStream) throws IOException;
 }

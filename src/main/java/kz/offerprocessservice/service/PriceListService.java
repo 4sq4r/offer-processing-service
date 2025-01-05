@@ -8,8 +8,8 @@ import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.repository.PriceListRepository;
+import kz.offerprocessservice.strategy.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
-import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategyFactory;
 import kz.offerprocessservice.util.ErrorMessageSource;
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +40,7 @@ public class PriceListService {
     private final PriceListMapper priceListMapper;
     private final WarehouseService warehouseService;
     private final ApplicationEventPublisher eventPublisher;
+    private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Transactional(rollbackFor = Exception.class)
     public PriceListDTO uploadPriceList(UUID merchantId, MultipartFile file) throws CustomException {
@@ -48,13 +49,13 @@ public class PriceListService {
         String fileName = salt + "." + split[split.length - 1];
         String url = StringUtils.MINIO_FILE_FORMAT.formatted(priceListFolderName, fileName);
         minioService.uploadFile(file, StringUtils.MINIO_FILE_FORMAT.formatted(actualMinioUrl, fileName));
-
         PriceListEntity entity = new PriceListEntity();
         entity.setName(fileName);
         entity.setMerchantId(merchantId);
         entity.setOriginalName(file.getOriginalFilename());
         entity.setUrl(url);
         entity.setStatus(PriceListStatus.NEW);
+        entity.setFormat(FileFormat.fromExtension("." + split[split.length -1]));
         priceListRepository.save(entity);
         eventPublisher.publishEvent(new FileUploadedEvent(this, entity.getId()));
 
@@ -63,8 +64,8 @@ public class PriceListService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<byte[]> downloadTemplate(UUID merchantId, FileFormat format) throws IOException {
-        FileTemplatingStrategy strategy = FileTemplatingStrategyFactory.getStrategy(format);
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
+        FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);
 
         return strategy.generate(warehouseNames);
     }

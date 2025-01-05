@@ -1,7 +1,8 @@
 package kz.offerprocessservice.strategy.file.processing.impl;
 
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
-import kz.offerprocessservice.strategy.file.processing.FileProcessStrategy;
+import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -12,10 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import static kz.offerprocessservice.util.FileUtils.*;
-
 @Slf4j
-public class ExcelFileProcessorStrategyImpl implements FileProcessStrategy {
+public class ExcelProcessingStrategyImpl implements FileProcessingStrategy {
     @Override
     public Set<PriceListItemDTO> extract(InputStream inputStream) throws IOException {
         try (Workbook wb = new XSSFWorkbook(inputStream)) {
@@ -26,13 +25,13 @@ public class ExcelFileProcessorStrategyImpl implements FileProcessStrategy {
             for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex);
 
-                if (isRowEmpty(row)) {
-                    break;
+                if (FileUtils.isRowEmpty(row)) {
+                    continue;
                 }
 
                 if (rowIndex == 0) {
                     for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-                        headerMap.put(cellIndex, getStringCellValue(row.getCell(cellIndex)));
+                        headerMap.put(cellIndex, FileUtils.getStringCellValue(row.getCell(cellIndex)));
                     }
                 } else {
                     PriceListItemDTO priceListItemDTO = new PriceListItemDTO();
@@ -40,12 +39,12 @@ public class ExcelFileProcessorStrategyImpl implements FileProcessStrategy {
 
                     for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
                         String headerCellName = headerMap.get(cellIndex);
-                        String cellValue = getStringCellValue(row.getCell(cellIndex));
+                        String cellValue = FileUtils.getStringCellValue(row.getCell(cellIndex));
 
-                        if (Objects.equals(headerCellName, OFFER_CODE)) {
-                            priceListItemDTO.setOfferCode(getStringCellValue(row.getCell(cellIndex)));
-                        } else if (Objects.equals(headerCellName, OFFER_NAME)) {
-                            priceListItemDTO.setOfferName(getStringCellValue(row.getCell(cellIndex)));
+                        if (Objects.equals(headerCellName, FileUtils.OFFER_CODE)) {
+                            priceListItemDTO.setOfferCode(FileUtils.getStringCellValue(row.getCell(cellIndex)));
+                        } else if (Objects.equals(headerCellName, FileUtils.OFFER_NAME)) {
+                            priceListItemDTO.setOfferName(FileUtils.getStringCellValue(row.getCell(cellIndex)));
                         } else {
                             try {
                                 int stock = Integer.parseInt(cellValue);

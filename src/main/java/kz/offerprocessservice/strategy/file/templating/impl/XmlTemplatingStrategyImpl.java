@@ -23,7 +23,7 @@ import java.util.Set;
 import static kz.offerprocessservice.util.FileUtils.*;
 
 @Slf4j
-public class XmlFileTemplatingStrategyImpl implements FileTemplatingStrategy {
+public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -52,6 +52,7 @@ public class XmlFileTemplatingStrategyImpl implements FileTemplatingStrategy {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.transform(new DOMSource(document), new StreamResult(out));
         } catch (Exception e) {
             throw new IOException("Error generating XML template", e);

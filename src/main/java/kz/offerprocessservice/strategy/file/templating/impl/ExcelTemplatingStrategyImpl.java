@@ -18,7 +18,7 @@ import java.util.Set;
 import static kz.offerprocessservice.model.enums.FileFormat.EXCEL;
 import static kz.offerprocessservice.util.FileUtils.*;
 
-public class ExcelFileTemplatingStrategyImpl implements FileTemplatingStrategy {
+public class ExcelTemplatingStrategyImpl implements FileTemplatingStrategy {
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) throws IOException {
         try (Workbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {

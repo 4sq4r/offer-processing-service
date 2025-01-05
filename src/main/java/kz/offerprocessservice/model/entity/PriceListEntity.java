@@ -1,6 +1,7 @@
 package kz.offerprocessservice.model.entity;
 
 import jakarta.persistence.*;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,4 +27,7 @@ public class PriceListEntity extends BaseEntity {
     private PriceListStatus status;
     @Column(name = "fail_reason")
     private String failReason;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private FileFormat format;
 }

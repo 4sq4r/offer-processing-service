@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 
 @Slf4j
@@ -23,14 +22,24 @@ public class FileUtils {
 
         for (int i = 0; i < r.getLastCellNum(); i++) {
             Cell cell = r.getCell(i);
-            if (cell != null && cell.getCellType() != CellType.BLANK) {
-                if (StringUtils.isBlank(getStringCellValue(cell))) {
-                    return false;
+            if (cell != null) {
+                switch (cell.getCellType()) {
+                    case STRING:
+                        if (StringUtils.isNotBlank(cell.getStringCellValue())) {
+                            return false;
+                        }
+                        break;
+                    case NUMERIC:
+                    case BOOLEAN:
+                    case FORMULA:
+                        return false;
+                    default:
+                        break;
                 }
             }
         }
 
-        return false;
+        return true;
     }
 
     public static String getStringCellValue(Cell c) {
@@ -51,14 +60,6 @@ public class FileUtils {
     }
 
     public static String getContentDisposition(FileFormat format) {
-        StringBuilder sb = new StringBuilder("attachment; filename=template.");
-
-        switch (format) {
-            case FileFormat.CSV -> sb.append("csv");
-            case FileFormat.XML -> sb.append("xml");
-            case FileFormat.EXCEL -> sb.append("xlsx");
-        }
-
-        return sb.toString();
+        return "attachment; filename=template" + format.getExtension();
     }
 }
