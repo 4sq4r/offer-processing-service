@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +41,7 @@ public class FileValidatedEventHandler {
     private String minioPrefixToDelete;
 
     @EventListener
-    public void handle(FileValidatedEvent event) throws CustomException, IOException {
+    public void handle(FileValidatedEvent event) throws CustomException, IOException, URISyntaxException {
         log.info("Handling validated file event, price list id: {}", event.getPriceList().getId());
         PriceListEntity ple = event.getPriceList();
         ple.setStatus(PriceListStatus.PROCESSING);
@@ -47,26 +49,29 @@ public class FileValidatedEventHandler {
         parse(ple);
     }
 
-    private void parse(PriceListEntity priceListEntity) throws CustomException, IOException {
-        InputStream inputStream = minioService.getFile(priceListEntity.getUrl()
-                .replaceFirst(minioPrefixToDelete, ""));
-        MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchantId());
-        FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(priceListEntity.getFormat());
-        Set<PriceListItemDTO> priceListItems = fileProcessingStrategy.extract(inputStream);
+    private void parse(PriceListEntity priceListEntity) throws CustomException, IOException, URISyntaxException {
+        try {
+            InputStream inputStream = minioService.getFile(priceListEntity.getUrl()
+                    .replaceFirst(minioPrefixToDelete, ""));
+            MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchantId());
+            FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(priceListEntity.getFormat());
+            Set<PriceListItemDTO> priceListItems = fileProcessingStrategy.extract(inputStream);
 
-        if (!priceListItems.isEmpty()) {
-            Set<OfferEntity> offers = saveOffers(priceListItems, me);
+            if (!priceListItems.isEmpty()) {
+                Set<OfferEntity> offers = saveOffers(priceListItems, me);
 
-            if (!offers.isEmpty()) {
-                Map<String, WarehouseEntity> warehouseMap = warehouseService.getAllWarehousesByMerchantId(me.getId()).stream()
-                        .collect(Collectors.toMap(WarehouseEntity::getName, wh -> wh));
-                saveStocks(priceListItems, offers, warehouseMap);
+                if (!offers.isEmpty()) {
+                    Map<String, WarehouseEntity> warehouseMap = warehouseService.getAllWarehousesByMerchantId(me.getId()).stream()
+                            .collect(Collectors.toMap(WarehouseEntity::getName, wh -> wh));
+                    saveStocks(priceListItems, offers, warehouseMap);
+                }
             }
-        }
 
-        priceListEntity.setStatus(PriceListStatus.PROCESSED);
-        priceListService.updateStatus(priceListEntity);
-        log.info("Price list successfully parsed: {}", priceListEntity.getId());
+            updatePriceListStatus(priceListEntity, PriceListStatus.PROCESSED, null);
+            log.info("Price list successfully parsed: {}", priceListEntity.getId());
+        } catch (SAXException e) {
+            handleParsingError(priceListEntity, e);
+        }
     }
 
     private Set<OfferEntity> saveOffers(Set<PriceListItemDTO> priceListItemSet, MerchantEntity merchantEntity) {
@@ -121,5 +126,15 @@ public class FileValidatedEventHandler {
             stockService.saveAll(stocks);
             log.info("Finished parse stocks from price list items. Parsed stocks count: {}", stocks.size());
         }
+    }
+
+    private void handleParsingError(PriceListEntity priceListEntity, Exception e) {
+        updatePriceListStatus(priceListEntity, PriceListStatus.FAILED, e.toString());
+    }
+
+    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListStatus status, String failReason) {
+        priceListEntity.setStatus(status);
+        priceListEntity.setFailReason(failReason);
+        priceListService.updateStatus(priceListEntity);
     }
 }
