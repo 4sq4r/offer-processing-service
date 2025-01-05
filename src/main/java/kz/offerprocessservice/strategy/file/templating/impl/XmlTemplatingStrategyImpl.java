@@ -52,6 +52,7 @@ public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.transform(new DOMSource(document), new StreamResult(out));
         } catch (Exception e) {
             throw new IOException("Error generating XML template", e);

@@ -11,6 +11,7 @@ import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.strategy.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.strategy.file.validation.FileValidationStrategy;
+import kz.offerprocessservice.util.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +58,8 @@ public class FileUploadedEventHandler {
 
     private boolean validate(PriceListEntity priceListEntity) throws CustomException {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(priceListEntity.getMerchantId());
+        warehouseNames.add(FileUtils.OFFER_CODE);
+        warehouseNames.add(FileUtils.OFFER_NAME);
         FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(priceListEntity.getFormat());
         String failReason = null;
         PriceListStatus status;
