@@ -1,6 +1,6 @@
-package kz.offerprocessservice.strategy.file.templating.impl;
+package kz.offerprocessservice.file.templating.impl;
 
-import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;

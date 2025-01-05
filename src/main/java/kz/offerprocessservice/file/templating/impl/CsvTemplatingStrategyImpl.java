@@ -1,7 +1,7 @@
-package kz.offerprocessservice.strategy.file.templating.impl;
+package kz.offerprocessservice.file.templating.impl;
 
 import kz.offerprocessservice.model.enums.FileFormat;
-import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
 import kz.offerprocessservice.util.FileUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

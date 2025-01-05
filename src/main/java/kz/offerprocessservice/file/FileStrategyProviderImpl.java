@@ -1,18 +1,18 @@
-package kz.offerprocessservice.strategy.file;
+package kz.offerprocessservice.file;
 
 import kz.offerprocessservice.model.enums.FileFormat;
-import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
-import kz.offerprocessservice.strategy.file.processing.impl.CsvProcessingStrategyImpl;
-import kz.offerprocessservice.strategy.file.processing.impl.ExcelProcessingStrategyImpl;
-import kz.offerprocessservice.strategy.file.processing.impl.XmlProcessingStrategyImpl;
-import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
-import kz.offerprocessservice.strategy.file.templating.impl.CsvTemplatingStrategyImpl;
-import kz.offerprocessservice.strategy.file.templating.impl.ExcelTemplatingStrategyImpl;
-import kz.offerprocessservice.strategy.file.templating.impl.XmlTemplatingStrategyImpl;
-import kz.offerprocessservice.strategy.file.validation.FileValidationStrategy;
-import kz.offerprocessservice.strategy.file.validation.impl.CsvValidationStrategyImpl;
-import kz.offerprocessservice.strategy.file.validation.impl.ExcelValidationStrategyImpl;
-import kz.offerprocessservice.strategy.file.validation.impl.XmlValidationStrategyImpl;
+import kz.offerprocessservice.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.file.processing.impl.CsvProcessingStrategyImpl;
+import kz.offerprocessservice.file.processing.impl.ExcelProcessingStrategyImpl;
+import kz.offerprocessservice.file.processing.impl.XmlProcessingStrategyImpl;
+import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.file.templating.impl.CsvTemplatingStrategyImpl;
+import kz.offerprocessservice.file.templating.impl.ExcelTemplatingStrategyImpl;
+import kz.offerprocessservice.file.templating.impl.XmlTemplatingStrategyImpl;
+import kz.offerprocessservice.file.validation.FileValidationStrategy;
+import kz.offerprocessservice.file.validation.impl.CsvValidationStrategyImpl;
+import kz.offerprocessservice.file.validation.impl.ExcelValidationStrategyImpl;
+import kz.offerprocessservice.file.validation.impl.XmlValidationStrategyImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

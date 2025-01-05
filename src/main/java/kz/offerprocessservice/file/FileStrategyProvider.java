@@ -1,9 +1,9 @@
-package kz.offerprocessservice.strategy.file;
+package kz.offerprocessservice.file;
 
 import kz.offerprocessservice.model.enums.FileFormat;
-import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
-import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
-import kz.offerprocessservice.strategy.file.validation.FileValidationStrategy;
+import kz.offerprocessservice.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.file.validation.FileValidationStrategy;
 
 public interface FileStrategyProvider {
 

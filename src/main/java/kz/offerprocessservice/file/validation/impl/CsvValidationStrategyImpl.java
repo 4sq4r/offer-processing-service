@@ -1,6 +1,6 @@
-package kz.offerprocessservice.strategy.file.validation.impl;
+package kz.offerprocessservice.file.validation.impl;
 
-import kz.offerprocessservice.strategy.file.validation.FileValidationStrategy;
+import kz.offerprocessservice.file.validation.FileValidationStrategy;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 

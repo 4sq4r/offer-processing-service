@@ -1,4 +1,4 @@
-package kz.offerprocessservice.strategy.file.validation;
+package kz.offerprocessservice.file.validation;
 
 import java.io.IOException;
 import java.io.InputStream;

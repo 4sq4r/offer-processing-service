@@ -1,4 +1,4 @@
-package kz.offerprocessservice.strategy.file.templating;
+package kz.offerprocessservice.file.templating;
 
 import jakarta.xml.bind.JAXBException;
 import org.springframework.http.ResponseEntity;

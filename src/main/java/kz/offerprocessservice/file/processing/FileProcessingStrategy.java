@@ -1,4 +1,4 @@
-package kz.offerprocessservice.strategy.file.processing;
+package kz.offerprocessservice.file.processing;
 
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import org.xml.sax.SAXException;

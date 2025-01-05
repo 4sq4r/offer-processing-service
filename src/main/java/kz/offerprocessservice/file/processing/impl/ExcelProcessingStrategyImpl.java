@@ -1,7 +1,7 @@
-package kz.offerprocessservice.strategy.file.processing.impl;
+package kz.offerprocessservice.file.processing.impl;
 
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
-import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;

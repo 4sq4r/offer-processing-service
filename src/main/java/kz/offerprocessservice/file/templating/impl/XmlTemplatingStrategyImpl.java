@@ -1,4 +1,4 @@
-package kz.offerprocessservice.strategy.file.templating.impl;
+package kz.offerprocessservice.file.templating.impl;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -7,7 +7,7 @@ import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.model.xml.XmlOffer;
 import kz.offerprocessservice.model.xml.XmlPriceListTemplate;
 import kz.offerprocessservice.model.xml.XmlStock;
-import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
 import kz.offerprocessservice.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

@@ -1,11 +1,11 @@
-package kz.offerprocessservice.strategy.file.processing.impl;
+package kz.offerprocessservice.file.processing.impl;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Unmarshaller;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import kz.offerprocessservice.model.xml.XmlPriceListTemplate;
 import kz.offerprocessservice.model.xml.XmlStock;
-import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.xml.sax.SAXException;
 
