@@ -1,5 +1,6 @@
 package kz.offerprocessservice.service;
 
+import jakarta.xml.bind.JAXBException;
 import kz.offerprocessservice.event.FileUploadedEvent;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.mapper.PriceListMapper;
@@ -11,6 +12,7 @@ import kz.offerprocessservice.repository.PriceListRepository;
 import kz.offerprocessservice.strategy.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
 import kz.offerprocessservice.util.ErrorMessageSource;
+import kz.offerprocessservice.util.FileUtils;
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -55,7 +58,7 @@ public class PriceListService {
         entity.setOriginalName(file.getOriginalFilename());
         entity.setUrl(url);
         entity.setStatus(PriceListStatus.NEW);
-        entity.setFormat(FileFormat.fromExtension("." + split[split.length -1]));
+        entity.setFormat(FileFormat.fromExtension("." + split[split.length - 1]));
         priceListRepository.save(entity);
         eventPublisher.publishEvent(new FileUploadedEvent(this, entity.getId()));
 
@@ -63,11 +66,15 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<byte[]> downloadTemplate(UUID merchantId, FileFormat format) throws IOException {
+    public ResponseEntity<byte[]> downloadTemplate(UUID merchantId, FileFormat format) throws IOException, JAXBException {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
         FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);
+        Set<String> extendedNames = new LinkedHashSet<>();
+        extendedNames.add(FileUtils.OFFER_CODE);
+        extendedNames.add(FileUtils.OFFER_NAME);
+        extendedNames.addAll(warehouseNames);
 
-        return strategy.generate(warehouseNames);
+        return strategy.generate(extendedNames);
     }
 
     @Transactional(rollbackFor = Exception.class)
