@@ -70,8 +70,12 @@ public class PriceListService {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
         FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);
         Set<String> extendedNames = new LinkedHashSet<>();
-        extendedNames.add(FileUtils.OFFER_CODE);
-        extendedNames.add(FileUtils.OFFER_NAME);
+
+        if (!format.equals(FileFormat.XML)) {
+            extendedNames.add(FileUtils.OFFER_CODE);
+            extendedNames.add(FileUtils.OFFER_NAME);
+        }
+
         extendedNames.addAll(warehouseNames);
 
         return strategy.generate(extendedNames);
