@@ -7,14 +7,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-@XmlRootElement(name = "offers")
+@XmlRootElement(name = "stocks")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class XmlPriceListTemplate {
+public class XmlStock {
 
-    @XmlElement(name = "offer")
-    private List<XmlOffer> offers;
+    @XmlElement
+    private String warehouseName;
+    @XmlElement
+    private Integer stock;
 }
