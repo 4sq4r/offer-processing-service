@@ -11,7 +11,7 @@ import java.util.Set;
 
 import static kz.offerprocessservice.util.FileUtils.*;
 
-public class CsvFileTemplatingStrategyImpl implements FileTemplatingStrategy {
+public class CsvTemplatingStrategyImpl implements FileTemplatingStrategy {
 
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) {

@@ -13,7 +13,7 @@ import java.util.Set;
 import static kz.offerprocessservice.util.FileUtils.OFFER_CODE;
 import static kz.offerprocessservice.util.FileUtils.OFFER_NAME;
 
-public class CsvFileValidationStrategyImpl implements FileValidationStrategy {
+public class CsvValidationStrategyImpl implements FileValidationStrategy {
     @Override
     public boolean validate(InputStream inputStream, Set<String> warehouseNames) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {

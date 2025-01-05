@@ -13,7 +13,7 @@ import java.util.Set;
 
 import static kz.offerprocessservice.util.FileUtils.*;
 
-public class ExcelFileValidationStrategyImpl implements FileValidationStrategy {
+public class ExcelValidationStrategyImpl implements FileValidationStrategy {
 
     @Override
     public boolean validate(InputStream inputStream, Set<String> warehouseNames) throws IOException {

@@ -3,13 +3,13 @@ package kz.offerprocessservice.event.handler;
 import kz.offerprocessservice.event.FileUploadedEvent;
 import kz.offerprocessservice.event.FileValidatedEvent;
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.strategy.file.validation.FileValidationStrategyFactory;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.processor.FileUploadProcessor;
 import kz.offerprocessservice.service.MinioService;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.WarehouseService;
+import kz.offerprocessservice.strategy.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.strategy.file.validation.FileValidationStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,7 @@ public class FileUploadedEventHandler {
     private final MinioService minioService;
     private final PriceListService priceListService;
     private final WarehouseService warehouseService;
+    private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Value("${minio.prefix-to-delete}")
     private String minioPrefixToDelete;
@@ -52,12 +53,11 @@ public class FileUploadedEventHandler {
                 log.error("Error processing file upload event: {}", e.getMessage());
             }
         });
-
     }
 
     private boolean validate(PriceListEntity priceListEntity) throws CustomException {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(priceListEntity.getMerchantId());
-        FileValidationStrategy validationStrategy = FileValidationStrategyFactory.getStrategy(priceListEntity.getName());
+        FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(priceListEntity.getFormat());
         String failReason = null;
         PriceListStatus status;
 

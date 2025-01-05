@@ -7,8 +7,8 @@ import kz.offerprocessservice.model.entity.*;
 import kz.offerprocessservice.model.enums.OfferStatus;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.service.*;
-import kz.offerprocessservice.strategy.file.processing.FileProcessStrategy;
-import kz.offerprocessservice.strategy.file.processing.FileProcessorStrategyFactory;
+import kz.offerprocessservice.strategy.file.FileStrategyProviderImpl;
+import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,13 +33,14 @@ public class FileValidatedEventHandler {
     private final MinioService minioService;
     private final PriceListService priceListService;
     private final WarehouseService warehouseService;
+    private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Value("${minio.prefix-to-delete}")
     private String minioPrefixToDelete;
 
     @EventListener
     public void handle(FileValidatedEvent event) throws CustomException, IOException {
-        log.info("Handling validated file event: {}", event.getPriceList().getId());
+        log.info("Handling validated file event, price list id: {}", event.getPriceList().getId());
         PriceListEntity ple = event.getPriceList();
         ple.setStatus(PriceListStatus.PROCESSING);
         priceListService.updateStatus(ple);
@@ -50,8 +51,8 @@ public class FileValidatedEventHandler {
         InputStream inputStream = minioService.getFile(priceListEntity.getUrl()
                 .replaceFirst(minioPrefixToDelete, ""));
         MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchantId());
-        FileProcessStrategy fileProcessStrategy = FileProcessorStrategyFactory.getStrategy(priceListEntity.getName());
-        Set<PriceListItemDTO> priceListItems = fileProcessStrategy.extract(inputStream);
+        FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(priceListEntity.getFormat());
+        Set<PriceListItemDTO> priceListItems = fileProcessingStrategy.extract(inputStream);
 
         if (!priceListItems.isEmpty()) {
             Set<OfferEntity> offers = saveOffers(priceListItems, me);

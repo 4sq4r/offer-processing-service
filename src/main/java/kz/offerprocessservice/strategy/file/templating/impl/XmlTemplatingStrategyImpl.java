@@ -23,7 +23,7 @@ import java.util.Set;
 import static kz.offerprocessservice.util.FileUtils.*;
 
 @Slf4j
-public class XmlFileTemplatingStrategyImpl implements FileTemplatingStrategy {
+public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

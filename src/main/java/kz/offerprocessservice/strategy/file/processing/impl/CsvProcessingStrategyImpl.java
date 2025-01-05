@@ -1,7 +1,7 @@
 package kz.offerprocessservice.strategy.file.processing.impl;
 
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
-import kz.offerprocessservice.strategy.file.processing.FileProcessStrategy;
+import kz.offerprocessservice.strategy.file.processing.FileProcessingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,7 +16,7 @@ import static kz.offerprocessservice.util.FileUtils.OFFER_CODE;
 import static kz.offerprocessservice.util.FileUtils.OFFER_NAME;
 
 @Slf4j
-public class CsvFileProcessorStrategyImpl implements FileProcessStrategy {
+public class CsvProcessingStrategyImpl implements FileProcessingStrategy {
     @Override
     public Set<PriceListItemDTO> extract(InputStream inputStream) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
@@ -50,12 +50,8 @@ public class CsvFileProcessorStrategyImpl implements FileProcessStrategy {
                     } else if (Objects.equals(header, OFFER_NAME)) {
                         priceListItemDTO.setOfferName(cellValue);
                     } else {
-                        try {
-                            int stock = Integer.parseInt(cellValue);
-                            stocks.put(header, stock);
-                        } catch (NumberFormatException e) {
-                            log.info("Invalid number format for header: {}: {}", header, cellValue);
-                        }
+                        int stock = Integer.parseInt(cellValue);
+                        stocks.put(header, stock);
                     }
                 }
 
