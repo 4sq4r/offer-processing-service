@@ -1,61 +1,37 @@
 package kz.offerprocessservice.strategy.file.templating.impl;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import kz.offerprocessservice.model.enums.FileFormat;
+import kz.offerprocessservice.model.xml.XmlPriceListTemplate;
 import kz.offerprocessservice.strategy.file.templating.FileTemplatingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 
-import static kz.offerprocessservice.util.FileUtils.*;
+import static kz.offerprocessservice.util.FileUtils.getContentDisposition;
 
 @Slf4j
 public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
     @Override
-    public ResponseEntity<byte[]> generate(Set<String> warehouseNames) throws IOException {
+    public ResponseEntity<byte[]> generate(Set<String> warehouseNames) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.newDocument();
-            Element root = document.createElement("Template");
-            document.appendChild(root);
-            Element headers = document.createElement("Headers");
-            root.appendChild(headers);
-            Element offerCode = document.createElement("Header");
-            offerCode.setTextContent(OFFER_CODE);
-            headers.appendChild(offerCode);
-            Element offerName = document.createElement("Header");
-            offerName.setTextContent(OFFER_NAME);
-            headers.appendChild(offerName);
-
-            for (String warehouse : warehouseNames) {
-                Element header = document.createElement("Header");
-                header.setTextContent(warehouse);
-                headers.appendChild(header);
-            }
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.transform(new DOMSource(document), new StreamResult(out));
-        } catch (Exception e) {
-            throw new IOException("Error generating XML template", e);
+            XmlPriceListTemplate template = new XmlPriceListTemplate();
+            template.setHeaders(new ArrayList<>(warehouseNames));
+            JAXBContext context = JAXBContext.newInstance(XmlPriceListTemplate.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.marshal(template, out);
+        } catch (JAXBException e) {
+            log.error("Error generating XML template: {}", e.getMessage());
         }
 
         HttpHeaders headers = new HttpHeaders();

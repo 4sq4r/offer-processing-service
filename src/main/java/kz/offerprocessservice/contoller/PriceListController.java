@@ -1,5 +1,6 @@
 package kz.offerprocessservice.contoller;
 
+import jakarta.xml.bind.JAXBException;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.dto.PriceListDTO;
 import kz.offerprocessservice.model.enums.FileFormat;
@@ -26,7 +27,7 @@ public class PriceListController {
     }
 
     @GetMapping("/{merchantId}/template")
-    public ResponseEntity<byte[]> downloadPriceListTemplate(@PathVariable UUID merchantId, @RequestParam FileFormat format) throws IOException {
+    public ResponseEntity<byte[]> downloadPriceListTemplate(@PathVariable UUID merchantId, @RequestParam FileFormat format) throws JAXBException, IOException {
         return service.downloadTemplate(merchantId, format);
     }
 }
