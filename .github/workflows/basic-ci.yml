@@ -35,15 +35,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build
     steps:
+      - uses: actions/checkout@v4
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 23
-          distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Run tests
