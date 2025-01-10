@@ -23,7 +23,7 @@ public class CityService {
 
     @Transactional(rollbackFor = Exception.class)
     public CityDTO saveOne(CityDTO dto) throws CustomException {
-//        dto.setName(validateName(dto.getName()));
+        dto.setName(validateName(dto.getName()));
         CityEntity entity = mapper.toEntity(dto);
         repository.save(entity);
 
