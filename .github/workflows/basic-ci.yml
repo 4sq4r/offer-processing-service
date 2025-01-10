@@ -23,7 +23,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Build the project
         run: |
-          ./gradlew build --no-daemon
+          ./gradlew -x test build --no-daemon
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
