@@ -24,12 +24,6 @@ jobs:
       - name: Build the project
         run: |
           ./gradlew build --no-daemon
-
-  test:
-    name: Unit-tests
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
       - name: Run tests
         run: |
           ./gradlew test --no-daemon
