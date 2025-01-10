@@ -25,4 +25,4 @@ jobs:
       - name: Build the project
         run: ./gradlew clean build -x test --no-daemon
       - name: Test
-        run: ./gradlew test --no-daemon
+        run: ./gradlew test --info --no-daemon
