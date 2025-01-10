@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  setup:
-    name: Set up environment
+  build:
+    name: Build the project
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -21,11 +21,6 @@ jobs:
           distribution: 'temurin'
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-  build:
-    name: Build the project
-    runs-on: ubuntu-22.04
-    needs: setup
-    steps:
       - name: Build the project
         run: |
           ./gradlew build --no-daemon
@@ -36,7 +31,7 @@ jobs:
           path: build/libs/*.jar
 
   test:
-    name: testing
+    name: Run tests
     runs-on: ubuntu-22.04
     needs: build
     steps:
@@ -44,6 +39,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 23
+          distribution: 'temurin'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Run tests
         run: |
           ./gradlew test --no-daemon
