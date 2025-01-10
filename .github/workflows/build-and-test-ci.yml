@@ -1,29 +1,38 @@
-name: pipeline
+name: basic-pipeline
 
 on:
   push:
     branches:
-      - main
+      - [ "master" ]
   pull_request:
     branches:
-      - main
+      - [ "master" ]
 
 jobs:
   build:
-    name: Build And Test
+    name: Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup JDK
-        uses: actions/setup-java
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
           java-version: 23
-
-      - name: Build and Test
+          distribution: 'temurin'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
+      - name: Build the project
         run: |
-          .gradlew build --no-daemon
-          .gradlew test --no-daemon
-
-
+          ./gradlew build --no-daemon
+  test:
+    name: Unit-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: build
+    steps:
+      - name: Run tests
+        run: |
+          ./gradlew test --no-daemon
