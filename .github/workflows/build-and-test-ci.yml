@@ -1,0 +1,29 @@
+name: pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build And Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java
+        with:
+          java-version: 23
+
+      - name: Build and Test
+        run: |
+          .gradlew build --no-daemon
+          .gradlew test --no-daemon
+
+
