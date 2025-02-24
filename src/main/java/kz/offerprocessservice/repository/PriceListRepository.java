@@ -10,13 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface PriceListRepository extends JpaRepository<PriceListEntity, UUID> {
-
-    @Query(nativeQuery = true,
-            value = """
-                    select *
-                    from price_lists
-                    where status = 'NEW';
-                    """)
-    Set<PriceListEntity> findAllNewPriceLists();
 }
 

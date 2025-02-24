@@ -1,6 +1,7 @@
 package kz.offerprocessservice.exception;
 
 import kz.offerprocessservice.model.dto.ErrorResponseDTO;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -21,11 +22,11 @@ import static java.util.stream.Collectors.toMap;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers,
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e,
+                                                                  @NotNull HttpHeaders headers,
                                                                   HttpStatusCode status,
-                                                                  WebRequest request) {
-        Map<String, String> invalidFields = ex.getFieldErrors().stream()
+                                                                  @NotNull WebRequest request) {
+        Map<String, String> invalidFields = e.getFieldErrors().stream()
                 .collect(toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .dateTime(LocalDateTime.now())
@@ -38,13 +39,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponseDTO> handleCustomException(CustomException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleCustomException(CustomException e) {
         ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
                 .dateTime(LocalDateTime.now())
-                .code(ex.getHttpStatus().value())
-                .message(ex.getMessage())
+                .code(e.getHttpStatus().value())
+                .message(e.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorResponseDTO, ex.getHttpStatus());
+        return new ResponseEntity<>(errorResponseDTO, e.getHttpStatus());
     }
 }

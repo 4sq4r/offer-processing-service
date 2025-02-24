@@ -30,8 +30,4 @@ public class CityController {
     public void deleteOne(@PathVariable UUID id) throws CustomException {
         service.deleteOne(id);
     }
-
-    @PutMapping
-    public void test() {
-    }
 }

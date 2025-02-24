@@ -1,6 +1,5 @@
 package kz.offerprocessservice.file;
 
-import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.file.processing.impl.CsvProcessingStrategyImpl;
 import kz.offerprocessservice.file.processing.impl.ExcelProcessingStrategyImpl;
@@ -13,6 +12,7 @@ import kz.offerprocessservice.file.validation.FileValidationStrategy;
 import kz.offerprocessservice.file.validation.impl.CsvValidationStrategyImpl;
 import kz.offerprocessservice.file.validation.impl.ExcelValidationStrategyImpl;
 import kz.offerprocessservice.file.validation.impl.XmlValidationStrategyImpl;
+import kz.offerprocessservice.model.enums.FileFormat;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

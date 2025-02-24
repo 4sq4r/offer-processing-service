@@ -2,13 +2,13 @@ package kz.offerprocessservice.event.handler;
 
 import kz.offerprocessservice.event.FileValidatedEvent;
 import kz.offerprocessservice.exception.CustomException;
+import kz.offerprocessservice.file.FileStrategyProviderImpl;
+import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import kz.offerprocessservice.model.entity.*;
 import kz.offerprocessservice.model.enums.OfferStatus;
 import kz.offerprocessservice.model.enums.PriceListStatus;
 import kz.offerprocessservice.service.*;
-import kz.offerprocessservice.file.FileStrategyProviderImpl;
-import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
