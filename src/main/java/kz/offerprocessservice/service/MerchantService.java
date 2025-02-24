@@ -55,6 +55,7 @@ public class MerchantService {
     public boolean existsById(UUID id) {
         return repository.existsById(id);
     }
+
     public MerchantEntity findEntityById(UUID id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()

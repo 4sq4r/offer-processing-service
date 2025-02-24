@@ -9,5 +9,4 @@ import java.util.UUID;
 @Repository
 public interface SkuRepository extends JpaRepository<SkuEntity, UUID> {
     boolean existsByNameIgnoreCase(String name);
-
 }

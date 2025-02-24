@@ -1,7 +1,7 @@
 package kz.offerprocessservice.file.processing.impl;
 
-import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -26,7 +26,6 @@ public class CsvProcessingStrategyImpl implements FileProcessingStrategy {
                     .build()
                     .parse(reader);
             List<String> headerNames = csvParser.getHeaderNames();
-            List<CSVRecord> records = csvParser.getRecords();
 
             if (headerNames == null || headerNames.isEmpty()) {
                 throw new IllegalArgumentException("CSV file is empty or does not contain headers");
@@ -34,7 +33,7 @@ public class CsvProcessingStrategyImpl implements FileProcessingStrategy {
 
             Set<PriceListItemDTO> result = new HashSet<>();
 
-            for (CSVRecord record : records) {
+            for (CSVRecord record : csvParser.getRecords()) {
                 if (record == null) {
                     break;
                 }

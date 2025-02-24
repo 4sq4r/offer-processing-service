@@ -3,10 +3,10 @@ package kz.offerprocessservice.file.validation.impl;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import kz.offerprocessservice.file.validation.FileValidationStrategy;
 import kz.offerprocessservice.model.xml.XmlOffer;
 import kz.offerprocessservice.model.xml.XmlPriceListTemplate;
 import kz.offerprocessservice.model.xml.XmlStock;
-import kz.offerprocessservice.file.validation.FileValidationStrategy;
 
 import java.io.IOException;
 import java.io.InputStream;
