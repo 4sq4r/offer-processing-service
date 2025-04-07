@@ -20,7 +20,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 23
+          java-version: 17
           distribution: 'temurin'
 
       - name: Set up Gradle
@@ -71,3 +71,4 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test --no-daemon
+
