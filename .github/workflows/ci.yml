@@ -39,42 +39,84 @@ jobs:
       - name: Build project
         run: ./gradlew build -x test --no-daemon
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: build/libs/*.jar
-
-  test:
-    runs-on: ubuntu-22.04
-    name: Testing
-    needs: build
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: 'temurin'
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-
       - name: Run tests
         run: ./gradlew test --no-daemon
 
+#name: main-ci
+#on:
+#  push:
+#    branches:
+#      - master
+#  pull_request:
+#    branches:
+#      - master
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-22.04
+#    name: Build
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Setup JDK
+#        uses: actions/setup-java@v4
+#        with:
+#          java-version: 17
+#          distribution: 'temurin'
+#
+#      - name: Set up Gradle
+#        uses: gradle/actions/setup-gradle@v4
+#
+#      - name: Cache Gradle dependencies
+#        uses: actions/cache@v3
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+#          restore-keys: |
+#            gradle-${{ runner.os }}-
+#
+#      - name: Build project
+#        run: ./gradlew build -x test --no-daemon
+#
+#      - name: Upload build artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: app-jar
+#          path: build/libs/*.jar
+#
+#  test:
+#    runs-on: ubuntu-22.04
+#    name: Testing
+#    needs: build
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Setup JDK
+#        uses: actions/setup-java@v4
+#        with:
+#          java-version: 17
+#          distribution: 'temurin'
+#
+#      - name: Cache Gradle dependencies
+#        uses: actions/cache@v3
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+#          restore-keys: |
+#            gradle-${{ runner.os }}-
+#
+#      - name: Download build artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: app-jar
+#
+#      - name: Run tests
+#        run: ./gradlew test --no-daemon
