@@ -1,0 +1,49 @@
+name: main-ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    name: Build and Test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 23
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Building the project
+        run: ./gradlew build -x test --no-daemon
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: build/libs/*.jar
+
+  test:
+    runs-on: ubuntu-22.04
+    name: Testing
+    needs: build
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: app-jar
+      - name: Testing
+        run: ./gradlew test --no-daemon
