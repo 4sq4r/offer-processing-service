@@ -10,7 +10,6 @@ import kz.offerprocessservice.model.xml.XmlStock;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,11 +20,9 @@ public class XmlValidationStrategyImpl implements FileValidationStrategy {
             JAXBContext context = JAXBContext.newInstance(XmlPriceListTemplate.class);
             Unmarshaller unmarshaller = context.createUnmarshaller();
             XmlPriceListTemplate priceList = (XmlPriceListTemplate) unmarshaller.unmarshal(inputStream);
-            List<XmlOffer> offers = priceList.getOffers();
 
-            for (XmlOffer offer : offers) {
-                List<XmlStock> stocks = offer.getStocks();
-                Set<String> tempNames = stocks.stream()
+            for (XmlOffer offer : priceList.getOffers()) {
+                Set<String> tempNames = offer.getStocks().stream()
                         .map(XmlStock::getWarehouseName)
                         .collect(Collectors.toSet());
 
