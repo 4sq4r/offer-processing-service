@@ -46,6 +46,7 @@ dependencies {
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
     implementation("org.springframework.statemachine:spring-statemachine-starter:4.0.1")
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     testImplementation 'org.instancio:instancio-junit:5.2.1'
 

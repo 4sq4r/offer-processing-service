@@ -2,29 +2,21 @@ package kz.offerprocessservice.configuration;
 
 import kz.offerprocessservice.statemachine.PriceListEvent;
 import kz.offerprocessservice.statemachine.PriceListState;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
-import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
-import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
-import org.springframework.statemachine.listener.StateMachineListener;
 
 @Slf4j
 @Configuration
-@EnableStateMachine
 @EnableStateMachineFactory
-@RequiredArgsConstructor
 public class PriceListStateMachineConfiguration extends StateMachineConfigurerAdapter<PriceListState, PriceListEvent> {
 
-
     private static final String PRICE_LIST_ID_HEADER = "priceListId";
-    private final StateMachineListener<PriceListState, PriceListEvent> listener;
 
     @Override
     public void configure(StateMachineStateConfigurer<PriceListState, PriceListEvent> states) throws Exception {
@@ -77,14 +69,6 @@ public class PriceListStateMachineConfiguration extends StateMachineConfigurerAd
                 .target(PriceListState.PROCESSING_FAILED)
                 .event(PriceListEvent.PROCESSING_ERROR);
     }
-
-    @Override
-    public void configure(StateMachineConfigurationConfigurer<PriceListState, PriceListEvent> config) throws Exception {
-        config.withConfiguration()
-                .autoStartup(true)
-                .listener(listener);
-    }
-
 
     @Bean
     public Action<PriceListState, PriceListEvent> validateAction() {
