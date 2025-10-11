@@ -6,7 +6,7 @@ import io.minio.MinioClient;
 import io.minio.errors.*;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.util.ErrorMessageSource;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -16,39 +16,33 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 @Configuration
+@RequiredArgsConstructor
 public class MinioConfiguration {
 
-    @Value("${minio.url}")
-    private String url;
-    @Value("${minio.bucket}")
-    private String bucket;
-    @Value("${minio.access-key}")
-    private String accessKey;
-    @Value("${minio.secret-key}")
-    private String secretKey;
-    @Value("${minio.auto-create-bucket}")
-    private boolean autoCreateBucket;
-    @Value("${minio.connect-timeout}")
-    private int connectTimeout;
-    @Value("${minio.write-timeout}")
-    private int writeTimeout;
-    @Value("${minio.read-timeout}")
-    private int readTimeout;
+    private final MinioProperties minioProperties;
 
     @Bean
     public MinioClient minioClient() throws ServerException, InsufficientDataException, ErrorResponseException,
             IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException, CustomException {
         MinioClient minioClient = new MinioClient.Builder()
-                .endpoint(url)
-                .credentials(accessKey, secretKey)
+                .endpoint(minioProperties.getUrl())
+                .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .build();
-        boolean isBucketExist = minioClient.bucketExists(BucketExistsArgs.builder()
-                .bucket(bucket).build());
-        minioClient.setTimeout(connectTimeout, writeTimeout, readTimeout);
+        String bucket = minioProperties.getBucket();
+        boolean isBucketExist = minioClient.bucketExists(
+                BucketExistsArgs.builder()
+                        .bucket(bucket)
+                        .build()
+        );
+        minioClient.setTimeout(
+                minioProperties.getConnectTimeout(),
+                minioProperties.getWriteTimeout(),
+                minioProperties.getReadTimeout()
+        );
 
         if (!isBucketExist) {
-            if (autoCreateBucket) {
+            if (minioProperties.getAutoCreateBucket()) {
                 minioClient.makeBucket(MakeBucketArgs.builder()
                         .bucket(bucket)
                         .build());

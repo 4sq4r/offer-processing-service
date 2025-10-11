@@ -7,7 +7,7 @@ import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import kz.offerprocessservice.model.entity.*;
 import kz.offerprocessservice.model.enums.OfferStatus;
-import kz.offerprocessservice.model.enums.PriceListStatus;
+import kz.offerprocessservice.statemachine.PriceListState;
 import kz.offerprocessservice.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class FileValidatedEventHandler {
     public void handle(FileValidatedEvent event) throws CustomException, IOException, URISyntaxException {
         log.info("Handling validated file event, price list id: {}", event.getPriceList().getId());
         PriceListEntity ple = event.getPriceList();
-        ple.setStatus(PriceListStatus.PROCESSING);
+        ple.setStatus(PriceListState.PROCESSING);
         priceListService.updateStatus(ple);
         parse(ple);
     }
@@ -67,7 +67,7 @@ public class FileValidatedEventHandler {
                 }
             }
 
-            updatePriceListStatus(priceListEntity, PriceListStatus.PROCESSED, null);
+            updatePriceListStatus(priceListEntity, PriceListState.PROCESSED, null);
             log.info("Price list successfully parsed: {}", priceListEntity.getId());
         } catch (SAXException e) {
             handleParsingError(priceListEntity, e);
@@ -129,10 +129,10 @@ public class FileValidatedEventHandler {
     }
 
     private void handleParsingError(PriceListEntity priceListEntity, Exception e) {
-        updatePriceListStatus(priceListEntity, PriceListStatus.FAILED, e.toString());
+        updatePriceListStatus(priceListEntity, PriceListState.PROCESSING_FAILED, e.toString());
     }
 
-    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListStatus status, String failReason) {
+    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListState status, String failReason) {
         priceListEntity.setStatus(status);
         priceListEntity.setFailReason(failReason);
         priceListService.updateStatus(priceListEntity);

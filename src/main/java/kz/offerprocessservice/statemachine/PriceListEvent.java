@@ -1,0 +1,12 @@
+package kz.offerprocessservice.statemachine;
+
+public enum PriceListEvent {
+
+    START_VALIDATION,
+    VALIDATION_SUCCESS,
+    VALIDATION_ERROR,
+    START_PROCESSING,
+    PROCESSING_SUCCESS,
+    PROCESSING_PARTIALLY_SUCCESS,
+    PROCESSING_ERROR
+}

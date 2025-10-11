@@ -2,7 +2,6 @@ package kz.offerprocessservice.file.validation.impl;
 
 import kz.offerprocessservice.file.validation.FileValidationStrategy;
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,12 +13,12 @@ public class CsvValidationStrategyImpl implements FileValidationStrategy {
     @Override
     public boolean validate(InputStream inputStream, Set<String> warehouseNames) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream)) {
-            CSVParser parser = CSVFormat.DEFAULT.builder()
+            List<String> headerNames = CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(false)
                     .build()
-                    .parse(reader);
-            List<String> headerNames = parser.getHeaderNames();
+                    .parse(reader)
+                    .getHeaderNames();
 
             if (headerNames == null || headerNames.isEmpty()) {
                 return false;

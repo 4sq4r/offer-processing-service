@@ -1,6 +1,6 @@
 package kz.offerprocessservice.model.dto;
 
-import kz.offerprocessservice.model.enums.PriceListStatus;
+import kz.offerprocessservice.statemachine.PriceListState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,5 +14,5 @@ public class PriceListDTO extends BaseDTO {
     private String originalName;
     private String url;
     private UUID merchantId;
-    private PriceListStatus status;
+    private PriceListState status;
 }
