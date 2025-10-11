@@ -26,10 +26,26 @@ services:
     networks:
       - ops-network
 
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ops-network
+    restart: unless-stopped
 networks:
   ops-network:
     driver: bridge
 
 volumes:
   minio_data:
+    driver: local
+  rabbitmq_data:
     driver: local
