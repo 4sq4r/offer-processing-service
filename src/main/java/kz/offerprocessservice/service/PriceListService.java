@@ -10,7 +10,6 @@ import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.repository.PriceListRepository;
 import kz.offerprocessservice.util.ErrorMessageSource;
-import kz.offerprocessservice.util.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -56,12 +55,6 @@ public class PriceListService {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
         FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);
         Set<String> extendedNames = new LinkedHashSet<>();
-
-        if (!format.equals(FileFormat.XML)) {
-            extendedNames.add(FileUtils.OFFER_CODE);
-            extendedNames.add(FileUtils.OFFER_NAME);
-        }
-
         extendedNames.addAll(warehouseNames);
 
         return strategy.generate(extendedNames);

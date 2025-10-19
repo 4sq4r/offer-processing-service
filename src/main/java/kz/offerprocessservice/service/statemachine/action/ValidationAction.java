@@ -33,8 +33,7 @@ public class ValidationAction implements PriceListAction {
     private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Override
-    public void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) throws CustomException {
-
+    public void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) {
         try {
             log.info("Handling file upload event: {}", priceListId);
             PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);

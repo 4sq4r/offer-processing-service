@@ -12,9 +12,8 @@ public interface PriceListAction extends Action<PriceListState, PriceListEvent> 
 
     @Override
     default void execute(StateContext<PriceListState, PriceListEvent> context) {
-        String priceListId = context.getMessageHeader(PRICE_LIST_ID_HEADER).toString();
         try {
-            doExecute(priceListId, context);
+            doExecute(context.getMessageHeader(PRICE_LIST_ID_HEADER).toString(), context);
         } catch (CustomException e) {
             throw new RuntimeException(e);
         }
