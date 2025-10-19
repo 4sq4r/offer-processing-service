@@ -38,6 +38,7 @@ minio:
   prefix-to-delete: /s3/offer-processing
   price-lists-folder: /s3/offer-processing/price-lists
   price-lists-url: /price-lists
+  file-format: '%s%s'
 
   part-size: 5242880
 

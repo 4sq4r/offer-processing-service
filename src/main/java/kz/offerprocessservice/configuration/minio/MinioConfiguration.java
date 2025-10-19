@@ -1,4 +1,4 @@
-package kz.offerprocessservice.configuration;
+package kz.offerprocessservice.configuration.minio;
 
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
