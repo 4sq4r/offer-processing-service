@@ -1,4 +1,4 @@
-package kz.offerprocessservice.statemachine;
+package kz.offerprocessservice.model;
 
 public enum PriceListState {
     UPLOADED,

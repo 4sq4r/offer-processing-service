@@ -1,6 +1,6 @@
 package kz.offerprocessservice.model.dto;
 
-import kz.offerprocessservice.statemachine.PriceListState;
+import kz.offerprocessservice.model.PriceListState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

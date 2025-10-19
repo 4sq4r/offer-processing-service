@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PriceListMessage {
+public class RabbitMessage {
 
     private UUID priceListId;
 }

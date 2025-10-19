@@ -4,10 +4,10 @@ import kz.offerprocessservice.event.FileValidatedEvent;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.model.PriceListState;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import kz.offerprocessservice.model.entity.*;
 import kz.offerprocessservice.model.enums.OfferStatus;
-import kz.offerprocessservice.statemachine.PriceListState;
 import kz.offerprocessservice.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class FileValidatedEventHandler {
         log.info("Handling validated file event, price list id: {}", event.getPriceList().getId());
         PriceListEntity ple = event.getPriceList();
         ple.setStatus(PriceListState.PROCESSING);
-        priceListService.updateStatus(ple);
+        priceListService.updateState(ple.getId(), PriceListState.PROCESSING);
         parse(ple);
     }
 
@@ -53,7 +53,7 @@ public class FileValidatedEventHandler {
         try {
             InputStream inputStream = minioService.getFile(priceListEntity.getUrl()
                     .replaceFirst(minioPrefixToDelete, ""));
-            MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchantId());
+            MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchant().getId());
             FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(priceListEntity.getFormat());
             Set<PriceListItemDTO> priceListItems = fileProcessingStrategy.extract(inputStream);
 
@@ -77,15 +77,16 @@ public class FileValidatedEventHandler {
     private Set<OfferEntity> saveOffers(Set<PriceListItemDTO> priceListItemSet, MerchantEntity merchantEntity) {
         if (!priceListItemSet.isEmpty()) {
             log.info("Started parse offers from price list items. List items count: {}", priceListItemSet.size());
-            Set<OfferEntity> offers = priceListItemSet.stream().map(item -> {
-                OfferEntity offer = new OfferEntity();
-                offer.setOfferName(item.getOfferName());
-                offer.setOfferCode(item.getOfferCode());
-                offer.setMerchant(merchantEntity);
-                offer.setStatus(OfferStatus.NEW);
+            Set<OfferEntity> offers = priceListItemSet.stream()
+                    .map(item -> {
+                        OfferEntity offer = new OfferEntity();
+                        offer.setOfferName(item.getOfferName());
+                        offer.setOfferCode(item.getOfferCode());
+                        offer.setMerchant(merchantEntity);
+                        offer.setStatus(OfferStatus.NEW);
 
-                return offer;
-            }).collect(Collectors.toSet());
+                        return offer;
+                    }).collect(Collectors.toSet());
 
             if (!offers.isEmpty()) {
                 offerService.saveAll(offers);
@@ -128,13 +129,13 @@ public class FileValidatedEventHandler {
         }
     }
 
-    private void handleParsingError(PriceListEntity priceListEntity, Exception e) {
+    private void handleParsingError(PriceListEntity priceListEntity, Exception e) throws CustomException {
         updatePriceListStatus(priceListEntity, PriceListState.PROCESSING_FAILED, e.toString());
     }
 
-    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListState status, String failReason) {
+    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListState status, String failReason) throws CustomException {
         priceListEntity.setStatus(status);
         priceListEntity.setFailReason(failReason);
-        priceListService.updateStatus(priceListEntity);
+        priceListService.updateState(priceListEntity.getId(), status);
     }
 }

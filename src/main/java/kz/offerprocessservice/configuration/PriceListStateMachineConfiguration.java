@@ -1,34 +1,51 @@
 package kz.offerprocessservice.configuration;
 
-import kz.offerprocessservice.statemachine.PriceListEvent;
-import kz.offerprocessservice.statemachine.PriceListState;
+import kz.offerprocessservice.model.PriceListEvent;
+import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.service.statemachine.action.ActionNames;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
-import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
+import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
+import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.listener.StateMachineListener;
+import org.springframework.statemachine.listener.StateMachineListenerAdapter;
+import org.springframework.statemachine.state.State;
+
+import java.util.EnumSet;
+import java.util.Map;
 
 @Slf4j
 @Configuration
 @EnableStateMachineFactory
-public class PriceListStateMachineConfiguration extends StateMachineConfigurerAdapter<PriceListState, PriceListEvent> {
+@RequiredArgsConstructor
+public class PriceListStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<PriceListState, PriceListEvent> {
 
-    private static final String PRICE_LIST_ID_HEADER = "priceListId";
+    public static final String PRICE_LIST_ID_HEADER = "priceListId";
+
+    private final Map<String, Action<PriceListState, PriceListEvent>> actions;
+
+    @Override
+    public void configure(StateMachineConfigurationConfigurer<PriceListState, PriceListEvent> config) throws Exception {
+        config.withConfiguration()
+                .listener(loggingListener())
+                .autoStartup(false);
+    }
 
     @Override
     public void configure(StateMachineStateConfigurer<PriceListState, PriceListEvent> states) throws Exception {
         states.withStates()
                 .initial(PriceListState.UPLOADED)
-                .state(PriceListState.VALIDATION)
-                .state(PriceListState.VALIDATED)
-                .state(PriceListState.PROCESSING)
                 .end(PriceListState.PROCESSED)
-                .state(PriceListState.PARTIALLY_PROCESSED)
                 .end(PriceListState.VALIDATION_FAILED)
-                .end(PriceListState.PROCESSING_FAILED);
+                .end(PriceListState.PROCESSING_FAILED)
+                .states(EnumSet.allOf(PriceListState.class));
     }
 
     @Override
@@ -38,6 +55,7 @@ public class PriceListStateMachineConfiguration extends StateMachineConfigurerAd
                 .source(PriceListState.UPLOADED)
                 .target(PriceListState.VALIDATION)
                 .event(PriceListEvent.START_VALIDATION)
+                .action(getAction(ActionNames.START_VALIDATION))
                 .and()
                 .withExternal()
                 .source(PriceListState.VALIDATION)
@@ -67,22 +85,30 @@ public class PriceListStateMachineConfiguration extends StateMachineConfigurerAd
                 .withExternal()
                 .source(PriceListState.PROCESSING)
                 .target(PriceListState.PROCESSING_FAILED)
-                .event(PriceListEvent.PROCESSING_ERROR);
+                .event(PriceListEvent.PROCESSING_ERROR)
+        ;
     }
 
     @Bean
-    public Action<PriceListState, PriceListEvent> validateAction() {
-        return context -> log.info(
-                "Running validation for price list: {}",
-                context.getMessageHeader(PRICE_LIST_ID_HEADER)
-        );
+    public StateMachineListener<PriceListState, PriceListEvent> loggingListener() {
+        return new StateMachineListenerAdapter<>() {
+            @Override
+            public void stateChanged(State<PriceListState, PriceListEvent> from, State<PriceListState, PriceListEvent> to) {
+                log.info("State changed from {} to {}", from == null ? "NONE" : from.getId(), to.getId());
+            }
+
+            @Override
+            public void eventNotAccepted(Message<PriceListEvent> event) {
+                log.warn("Event not accepted: {}", event);
+            }
+        };
     }
 
-    @Bean
-    public Action<PriceListState, PriceListEvent> processAction() {
-        return context -> log.info(
-                "Processing price list: {}",
-                context.getMessageHeader(PRICE_LIST_ID_HEADER)
-        );
+    private Action<PriceListState, PriceListEvent> getAction(String actionName) {
+        var action = actions.get(actionName);
+        if (action == null) {
+            log.error("Action not found: {}", actionName);
+        }
+        return action;
     }
 }
