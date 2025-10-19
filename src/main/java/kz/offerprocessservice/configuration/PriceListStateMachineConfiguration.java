@@ -61,6 +61,7 @@ public class PriceListStateMachineConfiguration extends EnumStateMachineConfigur
                 .source(PriceListState.VALIDATION)
                 .target(PriceListState.VALIDATED)
                 .event(PriceListEvent.VALIDATION_SUCCESS)
+                .action(getAction(ActionNames.VALIDATION_SUCCESS))
                 .and()
                 .withExternal()
                 .source(PriceListState.VALIDATION)

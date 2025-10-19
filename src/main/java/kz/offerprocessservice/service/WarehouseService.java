@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,11 +41,11 @@ public class WarehouseService {
         return mapper.toDTO(entity);
     }
 
-    public WarehouseDTO getOne(UUID id) throws CustomException {
+    public WarehouseDTO getOne(String id) throws CustomException {
         return mapper.toDTO(findEntityById(id));
     }
 
-    public Set<WarehouseEntity> getAllWarehousesByMerchantId(UUID id) {
+    public Set<WarehouseEntity> getAllWarehousesByMerchantId(String id) {
         if (merchantService.existsById(id)) {
             return repository.findAllByMerchantId(id);
         }
@@ -54,7 +53,7 @@ public class WarehouseService {
         return new HashSet<>();
     }
 
-    public Set<String> getAllWarehouseNamesByMerchantId(UUID id) {
+    public Set<String> getAllWarehouseNamesByMerchantId(String id) {
         return repository.findAllNamesByMerchantId(id)
                 .stream()
                 .sorted()
@@ -62,12 +61,12 @@ public class WarehouseService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void deleteOne(UUID id) throws CustomException {
+    public void deleteOne(String id) throws CustomException {
         repository.delete(findEntityById(id));
     }
 
 
-    private String validateName(String name, UUID merchantId) throws CustomException {
+    private String validateName(String name, String merchantId) throws CustomException {
         name = name.trim();
 
         if (repository.existsByNameIgnoreCaseAndMerchantId(name, merchantId)) {
@@ -80,7 +79,7 @@ public class WarehouseService {
         return name;
     }
 
-    private WarehouseEntity findEntityById(UUID id) throws CustomException {
+    private WarehouseEntity findEntityById(String id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)

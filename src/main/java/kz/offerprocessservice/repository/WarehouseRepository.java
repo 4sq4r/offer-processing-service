@@ -6,11 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Repository
-public interface WarehouseRepository extends JpaRepository<WarehouseEntity, UUID> {
-    boolean existsByNameIgnoreCaseAndMerchantId(String name, UUID merchantId);
+public interface WarehouseRepository extends JpaRepository<WarehouseEntity, String> {
+    boolean existsByNameIgnoreCaseAndMerchantId(String name, String merchantId);
 
     @Query(nativeQuery = true,
             value = """
@@ -18,7 +17,7 @@ public interface WarehouseRepository extends JpaRepository<WarehouseEntity, UUID
                     from warehouses
                     where merchant_id = :merchantId
                     """)
-    Set<String> findAllNamesByMerchantId(UUID merchantId);
+    Set<String> findAllNamesByMerchantId(String merchantId);
 
-    Set<WarehouseEntity> findAllByMerchantId(UUID merchantId);
+    Set<WarehouseEntity> findAllByMerchantId(String merchantId);
 }

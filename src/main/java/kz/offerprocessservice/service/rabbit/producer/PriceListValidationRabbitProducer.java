@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -17,7 +15,7 @@ public class PriceListValidationRabbitProducer {
 
     private final RabbitTemplate template;
 
-    public void sendToValidation(UUID priceListId) {
+    public void sendToValidation(String priceListId) {
         log.info("Sending price list {} to validation queue.", priceListId);
         template.convertAndSend(
                 RabbitConfiguration.VALIDATION_EXCHANGE,
@@ -26,7 +24,7 @@ public class PriceListValidationRabbitProducer {
         );
     }
 
-    public void sendValidationResult(UUID priceListId, boolean success) {
+    public void sendValidationResult(String priceListId, boolean success) {
         log.info("Sending price list validation result: {} to validation result queue.", priceListId);
         template.convertAndSend(
                 RabbitConfiguration.VALIDATION_RESULT_EXCHANGE,

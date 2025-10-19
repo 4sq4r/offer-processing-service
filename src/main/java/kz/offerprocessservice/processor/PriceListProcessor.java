@@ -29,7 +29,7 @@ public class PriceListProcessor {
     private final PriceListValidationRabbitProducer priceListValidationRabbitProducer;
 
     @Transactional(rollbackOn = CustomException.class)
-    public PriceListEntity uploadPriceList(UUID merchantId, MultipartFile file) throws CustomException {
+    public PriceListEntity uploadPriceList(String merchantId, MultipartFile file) throws CustomException {
         MerchantEntity merchantEntity = merchantService.findEntityById(merchantId);
         String[] split = file.getOriginalFilename().split("\\.");
         String format = split[split.length - 1];

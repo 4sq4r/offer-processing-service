@@ -7,8 +7,6 @@ import kz.offerprocessservice.service.CityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/cities/v1")
 @RequiredArgsConstructor
@@ -22,12 +20,12 @@ public class CityController {
     }
 
     @GetMapping("/{id}")
-    public CityDTO getOne(@PathVariable UUID id) throws CustomException {
+    public CityDTO getOne(@PathVariable String id) throws CustomException {
         return service.getOne(id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOne(@PathVariable UUID id) throws CustomException {
+    public void deleteOne(@PathVariable String id) throws CustomException {
         service.deleteOne(id);
     }
 }

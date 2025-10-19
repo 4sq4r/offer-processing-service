@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,11 +28,11 @@ public class MerchantService {
         return mapper.toDTO(entity);
     }
 
-    public MerchantDTO getOne(UUID id) throws CustomException {
+    public MerchantDTO getOne(String id) throws CustomException {
         return mapper.toDTO(findEntityById(id));
     }
 
-    public void deleteOne(UUID id) throws CustomException {
+    public void deleteOne(String id) throws CustomException {
         MerchantEntity entity = findEntityById(id);
         repository.delete(entity);
     }
@@ -52,15 +50,15 @@ public class MerchantService {
         return name;
     }
 
-    public boolean existsById(UUID id) {
+    public boolean existsById(String id) {
         return repository.existsById(id);
     }
 
-    public MerchantEntity findEntityById(UUID id) throws CustomException {
+    public MerchantEntity findEntityById(String id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id.toString()))
+                        .message(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id))
                         .build()
         );
     }

@@ -11,13 +11,13 @@ public enum ErrorMessageSource {
     SKU_NOT_FOUND("Sku not found: %s"),
     PRICE_LIST_NOT_FOUND("Price list not found: %s");
 
-    private String text;
+    private final String text;
 
     ErrorMessageSource(String text) {
         this.text = text;
     }
 
     public String getText(String... params) {
-        return String.format(this.text, params);
+        return String.format(this.text, (Object[]) params);
     }
 }

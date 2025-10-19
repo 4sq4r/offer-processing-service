@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -53,7 +52,7 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<byte[]> downloadTemplate(UUID merchantId, FileFormat format) throws IOException, JAXBException {
+    public ResponseEntity<byte[]> downloadTemplate(String merchantId, FileFormat format) throws IOException, JAXBException {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
         FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);
         Set<String> extendedNames = new LinkedHashSet<>();
@@ -69,7 +68,7 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public PriceListEntity findEntityById(UUID id) throws CustomException {
+    public PriceListEntity findEntityById(String id) throws CustomException {
         return priceListRepository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
@@ -79,14 +78,11 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateState(UUID id, PriceListState state) throws CustomException {
-        PriceListEntity entity = findEntityById(id);
-        entity.setStatus(state);
-
-        priceListRepository.save(entity);
+    public void updateOne(PriceListEntity priceListEntity) {
+        priceListRepository.save(priceListEntity);
     }
 
-    public PriceListState getCurrentState(UUID id) throws CustomException {
+    public PriceListState getCurrentState(String id) throws CustomException {
         return findEntityById(id).getStatus();
     }
 }

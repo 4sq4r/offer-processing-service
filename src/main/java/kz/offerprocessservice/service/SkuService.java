@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,11 +28,11 @@ public class SkuService {
         return mapper.toDTO(entity);
     }
 
-    public SkuDTO getOne(UUID id) throws CustomException {
+    public SkuDTO getOne(String id) throws CustomException {
         return mapper.toDTO(repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.SKU_NOT_FOUND.getText(id.toString()))
+                        .message(ErrorMessageSource.SKU_NOT_FOUND.getText(id))
                         .build()));
     }
 

@@ -19,8 +19,9 @@ public class ExcelValidationStrategyImpl implements FileValidationStrategy {
         try (Workbook wb = new XSSFWorkbook(inputStream)) {
             Sheet sheet = wb.getSheetAt(0);
             Row row = sheet.getRow(0);
+            int rowSize = row.getLastCellNum();
 
-            if (row == null) {
+            if (rowSize != warehouseNames.size()) {
                 return false;
             }
 
