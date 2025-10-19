@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional;
 import jakarta.xml.bind.JAXBException;
 import kz.offerprocessservice.configuration.MinioProperties;
 import kz.offerprocessservice.exception.CustomException;
+import kz.offerprocessservice.file.FileStrategyProviderImpl;
+import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
 import kz.offerprocessservice.model.entity.MerchantEntity;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.service.MerchantService;
 import kz.offerprocessservice.service.MinioService;
 import kz.offerprocessservice.service.PriceListService;
+import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.service.rabbit.producer.PriceListValidationRabbitProducer;
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -31,6 +36,8 @@ public class PriceListProcessor {
     private final PriceListService priceListService;
     private final MerchantService merchantService;
     private final PriceListValidationRabbitProducer priceListValidationRabbitProducer;
+    private final WarehouseService warehouseService;
+    private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Transactional(rollbackOn = CustomException.class)
     public PriceListEntity uploadPriceList(String merchantId, MultipartFile file) throws CustomException {
@@ -48,7 +55,12 @@ public class PriceListProcessor {
         return priceListEntity;
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<byte[]> downloadTemplate(String merchantId, FileFormat format) throws JAXBException, IOException {
-        return priceListService.downloadTemplate(merchantId, format);
+        Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
+        FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);
+        Set<String> extendedNames = new LinkedHashSet<>(warehouseNames);
+
+        return strategy.generate(extendedNames);
     }
 }
