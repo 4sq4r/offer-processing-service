@@ -4,8 +4,6 @@ import kz.offerprocessservice.model.PriceListState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.UUID;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PriceListDTO extends BaseDTO {
@@ -13,6 +11,6 @@ public class PriceListDTO extends BaseDTO {
     private String name;
     private String originalName;
     private String url;
-    private UUID merchantId;
+    private String merchantId;
     private PriceListState status;
 }

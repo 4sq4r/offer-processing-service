@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,12 +28,12 @@ public class CityService {
         return mapper.toDTO(entity);
     }
 
-    public CityDTO getOne(UUID id) throws CustomException {
+    public CityDTO getOne(String id) throws CustomException {
         return mapper.toDTO(findEntityById(id));
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void deleteOne(UUID id) throws CustomException {
+    public void deleteOne(String id) throws CustomException {
         repository.delete(findEntityById(id));
     }
 
@@ -52,7 +50,7 @@ public class CityService {
         return name;
     }
 
-    public CityEntity findEntityById(UUID id) throws CustomException {
+    public CityEntity findEntityById(String id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)

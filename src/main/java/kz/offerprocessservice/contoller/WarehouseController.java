@@ -7,8 +7,6 @@ import kz.offerprocessservice.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/warehouses/v1")
 @RequiredArgsConstructor
@@ -22,12 +20,12 @@ public class WarehouseController {
     }
 
     @GetMapping("/{id}")
-    public WarehouseDTO getOne(@PathVariable UUID id) throws CustomException {
+    public WarehouseDTO getOne(@PathVariable String id) throws CustomException {
         return service.getOne(id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOne(@PathVariable UUID id) throws CustomException {
+    public void deleteOne(@PathVariable String id) throws CustomException {
         service.deleteOne(id);
     }
 }

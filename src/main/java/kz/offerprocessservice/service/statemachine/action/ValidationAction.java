@@ -18,8 +18,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Set;
-import java.util.UUID;
 
 @Slf4j
 @Component(ActionNames.START_VALIDATION)
@@ -33,14 +33,16 @@ public class ValidationAction implements PriceListAction {
     private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Override
-    public void doExecute(UUID priceListId, StateContext<PriceListState, PriceListEvent> context) throws CustomException {
+    public void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) throws CustomException {
 
         try {
             log.info("Handling file upload event: {}", priceListId);
-            PriceListEntity ple = priceListService.findEntityById(priceListId);
-            ple.setStatus(PriceListState.VALIDATION);
-            priceListService.updateState(ple.getId(), PriceListState.VALIDATION);
-            boolean validated = validate(ple);
+            PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
+            priceListEntity.setStatus(PriceListState.VALIDATION);
+            priceListEntity.setUpdatedAt(LocalDateTime.now());
+            priceListService.updateOne(priceListEntity);
+
+            boolean validated = validate(priceListEntity);
 
             priceListValidationRabbitProducer.sendValidationResult(priceListId, validated);
             log.info("Validation price list for {} ended with result: {}", priceListId, validated);
@@ -50,14 +52,15 @@ public class ValidationAction implements PriceListAction {
     }
 
     private boolean validate(PriceListEntity priceListEntity) throws CustomException {
+        FileFormat fileFormat = priceListEntity.getFormat();
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(priceListEntity.getMerchant().getId());
 
-        if (!priceListEntity.getFormat().equals(FileFormat.XML)) {
+        if (!fileFormat.equals(FileFormat.XML)) {
             warehouseNames.add(FileUtils.OFFER_CODE);
             warehouseNames.add(FileUtils.OFFER_NAME);
         }
 
-        FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(priceListEntity.getFormat());
+        FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(fileFormat);
         PriceListState status;
         String failReason = null;
 

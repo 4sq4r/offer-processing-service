@@ -4,9 +4,7 @@ import kz.offerprocessservice.model.entity.SkuEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
-
 @Repository
-public interface SkuRepository extends JpaRepository<SkuEntity, UUID> {
+public interface SkuRepository extends JpaRepository<SkuEntity, String> {
     boolean existsByNameIgnoreCase(String name);
 }

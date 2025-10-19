@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class PriceListFacade {
@@ -17,7 +15,7 @@ public class PriceListFacade {
     private final PriceListProcessor processor;
     private final PriceListMapper mapper;
 
-    public PriceListDTO uploadPriceList(UUID merchantId, MultipartFile priceList) throws CustomException {
+    public PriceListDTO uploadPriceList(String merchantId, MultipartFile priceList) throws CustomException {
         return mapper.toDTO(processor.uploadPriceList(merchantId, priceList));
     }
 }

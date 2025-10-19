@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/price-lists/v1")
@@ -17,7 +15,7 @@ public class PriceListController {
     private final PriceListFacade facade;
 
     @PostMapping("/{merchantId}")
-    public PriceListDTO upload(@PathVariable UUID merchantId,
+    public PriceListDTO upload(@PathVariable String merchantId,
                                @RequestPart MultipartFile file) throws CustomException {
         return facade.uploadPriceList(merchantId, file);
     }

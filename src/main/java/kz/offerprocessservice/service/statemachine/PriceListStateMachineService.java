@@ -26,7 +26,7 @@ public class PriceListStateMachineService {
     private final StateMachineFactory<PriceListState, PriceListEvent> stateMachineFactory;
     private final PriceListService priceListService;
 
-    public void sendEvent(UUID priceListId, PriceListEvent event) throws CustomException {
+    public void sendEvent(String priceListId, PriceListEvent event) throws CustomException {
         PriceListState state = priceListService.getCurrentState(priceListId);
         StateMachine<PriceListState, PriceListEvent> stateMachine = stateMachineFactory.getStateMachine();
         stateMachine.stopReactively().subscribe();
@@ -37,7 +37,6 @@ public class PriceListStateMachineService {
                     ).block();
                 });
         stateMachine.startReactively().subscribe();
-        State<PriceListState, PriceListEvent> state1 = stateMachine.getState();
         stateMachine.sendEvent(Mono.just(MessageBuilder
                 .withPayload(event)
                 .setHeader(PRICE_LIST_ID_HEADER, priceListId)

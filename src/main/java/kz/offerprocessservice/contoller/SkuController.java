@@ -7,8 +7,6 @@ import kz.offerprocessservice.service.SkuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/skus/v1")
 @RequiredArgsConstructor
@@ -22,7 +20,7 @@ public class SkuController {
     }
 
     @GetMapping("/{id}")
-    public SkuDTO getOne(@PathVariable UUID id) throws CustomException {
+    public SkuDTO getOne(@PathVariable String id) throws CustomException {
         return service.getOne(id);
     }
 }
