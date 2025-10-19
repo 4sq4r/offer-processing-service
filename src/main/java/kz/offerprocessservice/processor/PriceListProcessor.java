@@ -1,10 +1,12 @@
 package kz.offerprocessservice.processor;
 
 import jakarta.transaction.Transactional;
+import jakarta.xml.bind.JAXBException;
 import kz.offerprocessservice.configuration.MinioProperties;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.entity.MerchantEntity;
 import kz.offerprocessservice.model.entity.PriceListEntity;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.service.MerchantService;
 import kz.offerprocessservice.service.MinioService;
 import kz.offerprocessservice.service.PriceListService;
@@ -12,9 +14,11 @@ import kz.offerprocessservice.service.rabbit.producer.PriceListValidationRabbitP
 import kz.offerprocessservice.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
@@ -44,4 +48,7 @@ public class PriceListProcessor {
         return priceListEntity;
     }
 
+    public ResponseEntity<byte[]> downloadTemplate(String merchantId, FileFormat format) throws JAXBException, IOException {
+        return priceListService.downloadTemplate(merchantId, format);
+    }
 }
