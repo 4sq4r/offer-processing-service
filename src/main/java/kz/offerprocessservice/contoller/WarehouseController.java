@@ -1,7 +1,7 @@
 package kz.offerprocessservice.contoller;
 
 import jakarta.validation.Valid;
-import kz.offerprocessservice.contoller.facade.WarehouseFacade;
+import kz.offerprocessservice.facade.WarehouseFacade;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.dto.WarehouseDTO;
 import lombok.RequiredArgsConstructor;

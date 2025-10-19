@@ -1,4 +1,4 @@
-package kz.offerprocessservice.contoller.facade;
+package kz.offerprocessservice.facade;
 
 import jakarta.xml.bind.JAXBException;
 import kz.offerprocessservice.exception.CustomException;

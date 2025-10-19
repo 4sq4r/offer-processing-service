@@ -1,6 +1,5 @@
 package kz.offerprocessservice.processor;
 
-import jakarta.transaction.Transactional;
 import jakarta.xml.bind.JAXBException;
 import kz.offerprocessservice.configuration.MinioProperties;
 import kz.offerprocessservice.exception.CustomException;
@@ -19,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class PriceListProcessor {
     private final WarehouseService warehouseService;
     private final FileStrategyProviderImpl fileStrategyProvider;
 
-    @Transactional(rollbackOn = CustomException.class)
+    @Transactional(rollbackFor = CustomException.class)
     public PriceListEntity uploadPriceList(String merchantId, MultipartFile file) throws CustomException {
         MerchantEntity merchantEntity = merchantService.findEntityById(merchantId);
         String[] split = file.getOriginalFilename().split("\\.");
@@ -55,7 +55,6 @@ public class PriceListProcessor {
         return priceListEntity;
     }
 
-    @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<byte[]> downloadTemplate(String merchantId, FileFormat format) throws JAXBException, IOException {
         Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(merchantId);
         FileTemplatingStrategy strategy = fileStrategyProvider.getTemplatingStrategy(format);

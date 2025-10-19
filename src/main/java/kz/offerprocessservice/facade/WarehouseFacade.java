@@ -1,4 +1,4 @@
-package kz.offerprocessservice.contoller.facade;
+package kz.offerprocessservice.facade;
 
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.mapper.WarehouseMapper;

@@ -1,4 +1,4 @@
-package kz.offerprocessservice.contoller.facade;
+package kz.offerprocessservice.facade;
 
 import kz.offerprocessservice.mapper.MerchantMapper;
 import lombok.RequiredArgsConstructor;
