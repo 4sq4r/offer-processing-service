@@ -1,18 +1,18 @@
 server:
   port: 8080
   servlet:
-    context-path: /offerprocess-service/api
+    context-path: /offer-processing-service/api
 spring:
   application:
-    name: offerprocess-service
+    name: offer-processing-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/offerprocess-service?currentSchema=public
+    url: jdbc:postgresql://localhost:5432/offer-processing-service?currentSchema=public
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   rabbit:
@@ -39,3 +39,4 @@ minio:
 logging:
   level:
     org.hibernate.orm.connections.pooling: error
+#    org.springframework.statemachine: DEBUG

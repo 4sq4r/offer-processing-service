@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication
 @EnableConfigurationProperties(MinioProperties.class)
-public class OfferProcessServiceApplication {
+public class OfferProcessingServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(OfferProcessServiceApplication.class, args);
+        SpringApplication.run(OfferProcessingServiceApplication.class, args);
     }
 }

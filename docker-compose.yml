@@ -20,14 +20,14 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=offerprocess-service
+      - POSTGRES_DB=offer-processing-service
     ports:
       - "5432:5432"
     networks:
       - ops-network
 
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
       - "5672:5672"
