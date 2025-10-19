@@ -1,7 +1,7 @@
 package kz.offerprocessservice.contoller;
 
 import jakarta.xml.bind.JAXBException;
-import kz.offerprocessservice.contoller.facade.PriceListFacade;
+import kz.offerprocessservice.facade.PriceListFacade;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.dto.PriceListDTO;
 import kz.offerprocessservice.model.enums.FileFormat;

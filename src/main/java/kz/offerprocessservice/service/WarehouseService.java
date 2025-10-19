@@ -1,8 +1,6 @@
 package kz.offerprocessservice.service;
 
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.mapper.WarehouseMapper;
-import kz.offerprocessservice.model.dto.WarehouseDTO;
 import kz.offerprocessservice.model.entity.CityEntity;
 import kz.offerprocessservice.model.entity.MerchantEntity;
 import kz.offerprocessservice.model.entity.WarehouseEntity;
@@ -13,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,33 +21,28 @@ import java.util.stream.Collectors;
 public class WarehouseService {
 
     private final WarehouseRepository repository;
-    private final WarehouseMapper mapper;
-    private final MerchantService merchantService;
-    private final CityService cityService;
 
-    @Transactional(rollbackFor = Exception.class)
-    public WarehouseDTO saveOne(WarehouseDTO dto) throws CustomException {
-        MerchantEntity merchantEntity = merchantService.findEntityById(dto.getMerchantId());
-        CityEntity cityEntity = cityService.findEntityById(dto.getCityId());
-        dto.setName(validateName(dto.getName(), merchantEntity.getId()));
-        WarehouseEntity entity = mapper.toEntity(dto);
+    @Transactional(rollbackFor = CustomException.class)
+    public WarehouseEntity saveOne(String name,
+                                   MerchantEntity merchantEntity,
+                                   CityEntity cityEntity
+    ) throws CustomException {
+        validateName(name, merchantEntity.getId());
+        WarehouseEntity entity = new WarehouseEntity();
+        entity.setName(name.trim());
         entity.setMerchant(merchantEntity);
         entity.setCity(cityEntity);
-        repository.save(entity);
+        entity.setName(name.trim());
 
-        return mapper.toDTO(entity);
+        return repository.save(entity);
     }
 
-    public WarehouseDTO getOne(String id) throws CustomException {
-        return mapper.toDTO(findEntityById(id));
+    public WarehouseEntity getOne(String id) throws CustomException {
+        return findEntityById(id);
     }
 
     public Set<WarehouseEntity> getAllWarehousesByMerchantId(String id) {
-        if (merchantService.existsById(id)) {
-            return repository.findAllByMerchantId(id);
-        }
-
-        return new HashSet<>();
+        return repository.findAllByMerchantId(id);
     }
 
     public Set<String> getAllWarehouseNamesByMerchantId(String id) {
@@ -60,15 +52,13 @@ public class WarehouseService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = CustomException.class)
     public void deleteOne(String id) throws CustomException {
         repository.delete(findEntityById(id));
     }
 
 
-    private String validateName(String name, String merchantId) throws CustomException {
-        name = name.trim();
-
+    private void validateName(String name, String merchantId) throws CustomException {
         if (repository.existsByNameIgnoreCaseAndMerchantId(name, merchantId)) {
             throw CustomException.builder()
                     .httpStatus(HttpStatus.BAD_REQUEST)
@@ -76,14 +66,13 @@ public class WarehouseService {
                     .build();
         }
 
-        return name;
     }
 
     private WarehouseEntity findEntityById(String id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.POINT_OF_SALE_NOT_FOUND.getText(id.toString()))
+                        .message(ErrorMessageSource.POINT_OF_SALE_NOT_FOUND.getText(id))
                         .build()
         );
     }
