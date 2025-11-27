@@ -1,8 +1,6 @@
 package kz.offerprocessservice.service;
 
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.mapper.CityMapper;
-import kz.offerprocessservice.model.dto.CityDTO;
 import kz.offerprocessservice.model.entity.CityEntity;
 import kz.offerprocessservice.repository.CityRepository;
 import kz.offerprocessservice.util.ErrorMessageSource;
@@ -13,23 +11,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class CityService {
 
     private final CityRepository repository;
-    private final CityMapper mapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public CityDTO saveOne(CityDTO dto) throws CustomException {
-        dto.setName(validateName(dto.getName()));
-        CityEntity entity = mapper.toEntity(dto);
-        repository.save(entity);
+    public CityEntity saveOne(String name) throws CustomException {
+        String trimmedName = name.trim();
+        validateName(trimmedName);
+        CityEntity entity = new CityEntity();
+        entity.setName(trimmedName);
 
-        return mapper.toDTO(entity);
+        return repository.save(entity);
     }
 
-    public CityDTO getOne(String id) throws CustomException {
-        return mapper.toDTO(findEntityById(id));
+    public CityEntity getOne(String id) throws CustomException {
+        return findEntityById(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -37,17 +34,13 @@ public class CityService {
         repository.delete(findEntityById(id));
     }
 
-    private String validateName(String name) throws CustomException {
-        name = name.trim();
-
+    private void validateName(String name) throws CustomException {
         if (repository.existsByNameIgnoreCase(name)) {
             throw CustomException.builder()
                     .httpStatus(HttpStatus.BAD_REQUEST)
                     .message(ErrorMessageSource.CITY_ALREADY_EXISTS.getText(name))
                     .build();
         }
-
-        return name;
     }
 
     public CityEntity findEntityById(String id) throws CustomException {
