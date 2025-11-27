@@ -1,6 +1,6 @@
 package kz.offerprocessservice.model.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,6 +8,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CityDTO extends BaseDTO {
 
-    @NotNull
+    @NotBlank(message = "City name must be not null.")
     private String name;
 }

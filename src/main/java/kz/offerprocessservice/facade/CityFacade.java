@@ -1,12 +1,14 @@
 package kz.offerprocessservice.facade;
 
-import kz.offerprocessservice.mapper.CityMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import jakarta.validation.constraints.NotNull;
+import kz.offerprocessservice.exception.CustomException;
+import kz.offerprocessservice.model.dto.CityDTO;
 
-@Component
-@RequiredArgsConstructor
-public class CityFacade {
+public interface CityFacade {
 
-    private final CityMapper mapper;
+    CityDTO saveOne(CityDTO dto) throws CustomException;
+
+    CityDTO findOne(@NotNull String id) throws CustomException;
+
+    void deleteOne(@NotNull String id) throws CustomException;
 }
