@@ -50,7 +50,6 @@ public abstract class ControllerTest {
             .withDatabaseName(TEST)
             .withUsername(TEST)
             .withPassword(TEST)
-            .waitingFor(forListeningPort())
             .waitingFor(forLogMessage(".*database system is ready to accept connections.*\\n", 1)
             .withStartupTimeout(Duration.ofSeconds(60)));
 
