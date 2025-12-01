@@ -27,7 +27,6 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.testcontainers.containers.wait.strategy.Wait.forListeningPort;
 import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
 
 
