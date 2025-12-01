@@ -30,7 +30,7 @@ public class WarehouseProcessor {
                                            String cityId
     ) throws CustomException {
         MerchantEntity merchantEntity = merchantService.findEntityById(merchantId);
-        CityEntity cityEntity = cityService.findEntityById(cityId);
+        CityEntity cityEntity = cityService.findById(cityId);
 
         return warehouseService.saveOne(name, merchantEntity, cityEntity);
     }

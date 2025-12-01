@@ -17,24 +17,38 @@ public class CityService {
 
     @Transactional(rollbackFor = Exception.class)
     public CityEntity saveOne(String name) throws CustomException {
+        validateCityName(name);
         String trimmedName = name.trim();
-        validateName(trimmedName);
+        isExists(trimmedName);
         CityEntity entity = new CityEntity();
         entity.setName(trimmedName);
+        entity = repository.save(entity);
 
-        return repository.save(entity);
-    }
-
-    public CityEntity getOne(String id) throws CustomException {
-        return findEntityById(id);
+        return entity;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteOne(String id) throws CustomException {
-        repository.delete(findEntityById(id));
+        repository.delete(findById(id));
     }
 
-    private void validateName(String name) throws CustomException {
+    private void validateCityName(String cityName) throws CustomException {
+        if (cityName == null || cityName.trim().isEmpty()) {
+            throw CustomException.builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message(ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName))
+                    .build();
+        }
+
+        if (cityName.matches(".*\\d.*")) {
+            throw CustomException.builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message(ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName))
+                    .build();
+        }
+    }
+
+    private void isExists(String name) throws CustomException {
         if (repository.existsByNameIgnoreCase(name)) {
             throw CustomException.builder()
                     .httpStatus(HttpStatus.BAD_REQUEST)
@@ -43,11 +57,11 @@ public class CityService {
         }
     }
 
-    public CityEntity findEntityById(String id) throws CustomException {
+    public CityEntity findById(String id) throws CustomException {
         return repository.findById(id).orElseThrow(
                 () -> CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.CITY_NOT_FOUND.getText(id.toString()))
+                        .httpStatus(HttpStatus.NOT_FOUND)
+                        .message(ErrorMessageSource.CITY_NOT_FOUND.getText(id))
                         .build()
         );
     }
