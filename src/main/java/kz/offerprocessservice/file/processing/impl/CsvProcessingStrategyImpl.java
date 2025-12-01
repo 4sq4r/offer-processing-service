@@ -10,7 +10,12 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static kz.offerprocessservice.util.FileUtils.OFFER_CODE;
 import static kz.offerprocessservice.util.FileUtils.OFFER_NAME;
@@ -48,9 +53,8 @@ public class CsvProcessingStrategyImpl implements FileProcessingStrategy {
                         priceListItemDTO.setOfferCode(cellValue);
                     } else if (Objects.equals(header, OFFER_NAME)) {
                         priceListItemDTO.setOfferName(cellValue);
-                    } else {
-                        int stock = Integer.parseInt(cellValue);
-                        stocks.put(header, stock);
+                    } else if (cellValue != null && !cellValue.isEmpty()) {
+                        stocks.put(header, Integer.parseInt(cellValue));
                     }
                 }
 

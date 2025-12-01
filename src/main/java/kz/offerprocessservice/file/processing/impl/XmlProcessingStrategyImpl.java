@@ -40,7 +40,7 @@ public class XmlProcessingStrategyImpl implements FileProcessingStrategy {
                         }).collect(Collectors.toSet());
             }
         } catch (Exception e) {
-            throw new SAXException(e.getCause().toString());
+            throw new SAXException(e);
         }
 
         return Set.of();

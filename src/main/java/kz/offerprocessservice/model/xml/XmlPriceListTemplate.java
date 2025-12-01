@@ -7,6 +7,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,5 +17,5 @@ import java.util.List;
 public class XmlPriceListTemplate {
 
     @XmlElement(name = "offer")
-    private List<XmlOffer> offers;
+    private List<XmlOffer> offers = new ArrayList<>();
 }
