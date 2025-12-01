@@ -25,9 +25,10 @@ public class WarehouseProcessor {
     private final MerchantService merchantService;
     private final CityService cityService;
 
-    public WarehouseEntity createWarehouse(String name,
-                                           String merchantId,
-                                           String cityId
+    public WarehouseEntity createWarehouse(
+            String name,
+            String merchantId,
+            String cityId
     ) throws CustomException {
         MerchantEntity merchantEntity = merchantService.findEntityById(merchantId);
         CityEntity cityEntity = cityService.findById(cityId);
