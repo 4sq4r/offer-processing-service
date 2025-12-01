@@ -45,13 +45,14 @@ public abstract class ControllerTest {
     protected MockMvc mockMvc;
 
     @Container
+    @SuppressWarnings("resource")
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>(POSTGRES_IMAGE_NAME)
             .withDatabaseName(TEST)
             .withUsername(TEST)
             .withPassword(TEST)
             .waitingFor(forListeningPort())
-            .withStartupTimeout(Duration.ofSeconds(10))
-            .waitingFor(forLogMessage(".*database system is ready to accept connections.*\\n", 1));
+            .waitingFor(forLogMessage(".*database system is ready to accept connections.*\\n", 1)
+            .withStartupTimeout(Duration.ofSeconds(60)));
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
