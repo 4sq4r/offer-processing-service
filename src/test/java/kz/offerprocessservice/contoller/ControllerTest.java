@@ -28,6 +28,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.testcontainers.containers.wait.strategy.Wait.forListeningPort;
+import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
 
 
 @Testcontainers
@@ -49,7 +50,8 @@ public abstract class ControllerTest {
             .withUsername(TEST)
             .withPassword(TEST)
             .waitingFor(forListeningPort())
-            .withStartupTimeout(Duration.ofSeconds(10));
+            .withStartupTimeout(Duration.ofSeconds(10))
+            .waitingFor(forLogMessage(".*database system is ready to accept connections.*\\n", 1));
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
