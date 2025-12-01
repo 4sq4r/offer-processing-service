@@ -17,8 +17,5 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
-      - uses: atomicjar/testcontainers-cloud-setup-action@v1
-        with:
-          token: ${{ secrets.TC_CLOUD_TOKEN }}
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew build --no-daemon --stacktrace
