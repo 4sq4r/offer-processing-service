@@ -20,6 +20,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import util.Fields;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +48,8 @@ public abstract class ControllerTest {
             .withDatabaseName(TEST)
             .withUsername(TEST)
             .withPassword(TEST)
-            .waitingFor(forListeningPort());
+            .waitingFor(forListeningPort())
+            .withStartupTimeout(Duration.ofSeconds(10));
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
