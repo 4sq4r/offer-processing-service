@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
 
-
 @Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,7 +49,7 @@ public abstract class ControllerTest {
             .withUsername(TEST)
             .withPassword(TEST)
             .waitingFor(forLogMessage(".*database system is ready to accept connections.*\\n", 1)
-            .withStartupTimeout(Duration.ofSeconds(60)));
+                                .withStartupTimeout(Duration.ofSeconds(60)));
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
