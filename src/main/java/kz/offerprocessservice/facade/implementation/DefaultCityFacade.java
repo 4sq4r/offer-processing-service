@@ -24,7 +24,7 @@ public class DefaultCityFacade implements CityFacade {
 
     @Override
     public CityDTO findOne(String id) throws CustomException {
-        return mapper.toDTO(service.getOne(id));
+        return mapper.toDTO(service.findById(id));
     }
 
     @Override
