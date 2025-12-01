@@ -26,6 +26,7 @@ import java.util.Map;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.testcontainers.containers.wait.strategy.Wait.forListeningPort;
 
 
 @Testcontainers
@@ -45,7 +46,8 @@ public abstract class ControllerTest {
     static PostgreSQLContainer<?> container = new PostgreSQLContainer<>(POSTGRES_IMAGE_NAME)
             .withDatabaseName(TEST)
             .withUsername(TEST)
-            .withPassword(TEST);
+            .withPassword(TEST)
+            .waitingFor(forListeningPort());
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
