@@ -2,7 +2,7 @@ spring:
   datasource:
     username: test
     password: test
-    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+    driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 5
