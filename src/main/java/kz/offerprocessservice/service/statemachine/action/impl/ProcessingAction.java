@@ -6,9 +6,18 @@ import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.PriceListState;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
-import kz.offerprocessservice.model.entity.*;
+import kz.offerprocessservice.model.entity.MerchantEntity;
+import kz.offerprocessservice.model.entity.OfferEntity;
+import kz.offerprocessservice.model.entity.PriceListEntity;
+import kz.offerprocessservice.model.entity.StockEntity;
+import kz.offerprocessservice.model.entity.WarehouseEntity;
 import kz.offerprocessservice.model.enums.OfferStatus;
-import kz.offerprocessservice.service.*;
+import kz.offerprocessservice.service.MerchantService;
+import kz.offerprocessservice.service.MinioService;
+import kz.offerprocessservice.service.OfferService;
+import kz.offerprocessservice.service.PriceListService;
+import kz.offerprocessservice.service.StockService;
+import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
 import kz.offerprocessservice.service.statemachine.action.PriceListAction;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +54,6 @@ public class ProcessingAction implements PriceListAction {
             priceListEntity.setStatus(PriceListState.PROCESSING);
             priceListService.updateOne(priceListEntity);
             parse(priceListEntity);
-
         } catch (IOException e) {
             log.info("Unable to process file: {}", e.getMessage());
         } catch (URISyntaxException e) {
@@ -72,8 +80,7 @@ public class ProcessingAction implements PriceListAction {
                 }
             }
 
-//            updatePriceListStatus(priceListEntity, PriceListState.PROCESSED, null);
-            log.info("Price list successfully parsed: {}", priceListEntity.getId());
+            updatePriceListStatus(priceListEntity, PriceListState.PROCESSED, null);
         } catch (SAXException e) {
             handleParsingError(priceListEntity, e);
         }
@@ -81,7 +88,6 @@ public class ProcessingAction implements PriceListAction {
 
     private Set<OfferEntity> saveOffers(Set<PriceListItemDTO> priceListItemSet, MerchantEntity merchantEntity) {
         if (!priceListItemSet.isEmpty()) {
-            log.info("Started parse offers from price list items. List items count: {}", priceListItemSet.size());
             Set<OfferEntity> offers = priceListItemSet.stream()
                     .map(item -> {
                         OfferEntity offer = new OfferEntity();
@@ -95,7 +101,6 @@ public class ProcessingAction implements PriceListAction {
 
             if (!offers.isEmpty()) {
                 offerService.saveAll(offers);
-                log.info("Finished parse offers from price list items. Parsed offers count: {}", offers.size());
             }
 
             return offers;
@@ -104,10 +109,11 @@ public class ProcessingAction implements PriceListAction {
         return new HashSet<>();
     }
 
-    private void saveStocks(Set<PriceListItemDTO> priceListItemDTO,
-                            Set<OfferEntity> offers,
-                            Map<String, WarehouseEntity> warehouseMap) {
-        log.info("Started parse stocks from price list items. List items count: {}", priceListItemDTO.size());
+    private void saveStocks(
+            Set<PriceListItemDTO> priceListItemDTO,
+            Set<OfferEntity> offers,
+            Map<String, WarehouseEntity> warehouseMap
+    ) {
         Set<StockEntity> stocks = new HashSet<>();
         priceListItemDTO.forEach(item -> {
             OfferEntity offerEntity = offers.stream()
@@ -130,15 +136,14 @@ public class ProcessingAction implements PriceListAction {
 
         if (!stocks.isEmpty()) {
             stockService.saveAll(stocks);
-            log.info("Finished parse stocks from price list items. Parsed stocks count: {}", stocks.size());
         }
     }
 
-    private void handleParsingError(PriceListEntity priceListEntity, Exception e) throws CustomException {
-//        updatePriceListStatus(priceListEntity, PriceListState.PROCESSING_FAILED, e.toString());
+    private void handleParsingError(PriceListEntity priceListEntity, Exception e) {
+        updatePriceListStatus(priceListEntity, PriceListState.PROCESSING_FAILED, e.toString());
     }
 
-    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListState status, String failReason) throws CustomException {
+    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListState status, String failReason) {
         priceListEntity.setStatus(status);
         priceListEntity.setFailReason(failReason);
         priceListService.updateOne(priceListEntity);
