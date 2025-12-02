@@ -1,11 +1,13 @@
 package kz.offerprocessservice.service.rabbit.producer;
 
-import kz.offerprocessservice.configuration.RabbitConfiguration;
 import kz.offerprocessservice.model.dto.rabbit.RabbitMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+
+import static kz.offerprocessservice.configuration.RabbitConfiguration.PROCESSING_EXCHANGE;
+import static kz.offerprocessservice.configuration.RabbitConfiguration.PROCESSING_ROUTING_KEY;
 
 @Slf4j
 @Component
@@ -17,8 +19,8 @@ public class PriceListProcessingProducer {
     public void sendToProcessing(String priceListId) {
         log.info("Sending price list {} to processing queue.", priceListId);
         template.convertAndSend(
-                RabbitConfiguration.PROCESSING_EXCHANGE,
-                RabbitConfiguration.PROCESSING_ROUTING_KEY,
+                PROCESSING_EXCHANGE,
+                PROCESSING_ROUTING_KEY,
                 new RabbitMessage(priceListId)
         );
     }
