@@ -19,7 +19,7 @@ jobs:
           java-version: 17
           distribution: temurin
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew build --no-daemon --info
+      - run: ./gradlew build --no-daemon
 
       - uses: dorny/test-reporter@v1
         if: always()
@@ -27,9 +27,3 @@ jobs:
           name: JUnit Tests
           path: build/test-results/test/*.xml
           reporter: java-junit
-
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: build/libs/*.jar
