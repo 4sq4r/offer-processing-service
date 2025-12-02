@@ -1,6 +1,5 @@
 package kz.offerprocessservice.service.statemachine.action;
 
-import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.PriceListState;
 import org.springframework.statemachine.StateContext;
@@ -11,13 +10,9 @@ import static kz.offerprocessservice.configuration.PriceListStateMachineConfigur
 public interface PriceListAction extends Action<PriceListState, PriceListEvent> {
 
     @Override
-    default void execute(StateContext<PriceListState, PriceListEvent> context) {
-        try {
-            doExecute(context.getMessageHeader(PRICE_LIST_ID_HEADER).toString(), context);
-        } catch (CustomException e) {
-            throw new RuntimeException(e);
-        }
+    default void execute(StateContext<PriceListState, PriceListEvent> context){
+        doExecute(context.getMessageHeader(PRICE_LIST_ID_HEADER).toString(), context);
     }
 
-    void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) throws CustomException;
+    void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context);
 }
