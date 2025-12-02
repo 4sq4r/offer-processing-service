@@ -16,8 +16,17 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew build --no-daemon --info
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+#      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew clean test --no-daemon
+      - run: ./gradlew build --no-daemon
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: always()
