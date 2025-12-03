@@ -1,7 +1,7 @@
 package kz.offerprocessservice.service;
 
 import kz.offerprocessservice.exception.CustomException;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.entity.MerchantEntity;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.FileFormat;
@@ -34,7 +34,7 @@ public class PriceListService {
         entity.setMerchant(merchantEntity);
         entity.setOriginalName(file.getOriginalFilename());
         entity.setUrl(url);
-        entity.setStatus(PriceListState.UPLOADED);
+        entity.setStatus(PriceListStatus.UPLOADED);
         entity.setFormat(FileFormat.fromExtension("." + format));
 
         return priceListRepository.save(entity);
@@ -52,7 +52,7 @@ public class PriceListService {
         priceListRepository.save(priceListEntity);
     }
 
-    public PriceListState getCurrentState(String id) {
+    public PriceListStatus getCurrentState(String id) {
         return findEntityById(id).getStatus();
     }
 }

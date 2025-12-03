@@ -1,7 +1,7 @@
 package kz.offerprocessservice.configuration;
 
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,81 +25,86 @@ import java.util.Map;
 @Configuration
 @EnableStateMachineFactory
 @RequiredArgsConstructor
-public class PriceListStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<PriceListState, PriceListEvent> {
+public class PriceListStateMachineConfiguration extends EnumStateMachineConfigurerAdapter<PriceListStatus, PriceListEvent> {
 
     public static final String PRICE_LIST_ID_HEADER = "priceListId";
 
-    private final Map<String, Action<PriceListState, PriceListEvent>> actions;
+    private final Map<String, Action<PriceListStatus, PriceListEvent>> actions;
 
     @Override
-    public void configure(StateMachineConfigurationConfigurer<PriceListState, PriceListEvent> config) throws Exception {
+    public void configure(StateMachineConfigurationConfigurer<PriceListStatus, PriceListEvent> config)
+            throws Exception {
         config.withConfiguration()
                 .listener(loggingListener())
                 .autoStartup(false);
     }
 
     @Override
-    public void configure(StateMachineStateConfigurer<PriceListState, PriceListEvent> states) throws Exception {
+    public void configure(StateMachineStateConfigurer<PriceListStatus, PriceListEvent> states) throws Exception {
         states.withStates()
-                .initial(PriceListState.UPLOADED)
-                .end(PriceListState.PROCESSED)
-                .end(PriceListState.VALIDATION_FAILED)
-                .end(PriceListState.PROCESSING_FAILED)
-                .states(EnumSet.allOf(PriceListState.class));
+                .initial(PriceListStatus.UPLOADED)
+                .end(PriceListStatus.PROCESSED)
+                .end(PriceListStatus.VALIDATION_FAILED)
+                .end(PriceListStatus.PROCESSING_FAILED)
+                .states(EnumSet.allOf(PriceListStatus.class));
     }
 
     @Override
-    public void configure(StateMachineTransitionConfigurer<PriceListState, PriceListEvent> transitions) throws Exception {
+    public void configure(StateMachineTransitionConfigurer<PriceListStatus, PriceListEvent> transitions)
+            throws Exception {
         transitions
                 .withExternal()
-                .source(PriceListState.UPLOADED)
-                .target(PriceListState.VALIDATION)
+                .source(PriceListStatus.UPLOADED)
+                .target(PriceListStatus.VALIDATION)
                 .event(PriceListEvent.START_VALIDATION)
                 .action(getAction(ActionNames.START_VALIDATION))
                 .and()
                 .withExternal()
-                .source(PriceListState.VALIDATION)
-                .target(PriceListState.VALIDATED)
+                .source(PriceListStatus.VALIDATION)
+                .target(PriceListStatus.VALIDATED)
                 .event(PriceListEvent.VALIDATION_SUCCESS)
                 .action(getAction(ActionNames.VALIDATION_SUCCESS))
                 .and()
                 .withExternal()
-                .source(PriceListState.VALIDATION)
-                .target(PriceListState.VALIDATION_FAILED)
+                .source(PriceListStatus.VALIDATION)
+                .target(PriceListStatus.VALIDATION_FAILED)
                 .event(PriceListEvent.VALIDATION_ERROR)
                 .action(getAction(ActionNames.VALIDATION_ERROR))
                 .and()
                 .withExternal()
-                .source(PriceListState.VALIDATED)
-                .target(PriceListState.PROCESSING)
+                .source(PriceListStatus.VALIDATED)
+                .target(PriceListStatus.PROCESSING)
                 .event(PriceListEvent.START_PROCESSING)
                 .action(getAction(ActionNames.START_PROCESSING))
                 .and()
                 .withExternal()
-                .source(PriceListState.PROCESSING)
-                .target(PriceListState.PROCESSED)
+                .source(PriceListStatus.PROCESSING)
+                .target(PriceListStatus.PROCESSED)
                 .event(PriceListEvent.PROCESSING_SUCCESS)
                 .action(getAction(ActionNames.PROCESSED))
                 .and()
                 .withExternal()
-                .source(PriceListState.PROCESSING)
-                .target(PriceListState.PARTIALLY_PROCESSED)
+                .source(PriceListStatus.PROCESSING)
+                .target(PriceListStatus.PARTIALLY_PROCESSED)
                 .event(PriceListEvent.PROCESSING_PARTIALLY_SUCCESS)
                 .action(getAction(ActionNames.PARTIALLY_PROCESSED))
                 .and()
                 .withExternal()
-                .source(PriceListState.PROCESSING)
-                .target(PriceListState.PROCESSING_FAILED)
+                .source(PriceListStatus.PROCESSING)
+                .target(PriceListStatus.PROCESSING_FAILED)
                 .event(PriceListEvent.PROCESSING_ERROR)
                 .action(getAction(ActionNames.PROCESSING_FAILED))
         ;
     }
 
     @Bean
-    public StateMachineListener<PriceListState, PriceListEvent> loggingListener() {
+    public StateMachineListener<PriceListStatus, PriceListEvent> loggingListener() {
         return new StateMachineListenerAdapter<>() {
             @Override
-            public void stateChanged(State<PriceListState, PriceListEvent> from, State<PriceListState, PriceListEvent> to) {
+            public void stateChanged(
+                    State<PriceListStatus, PriceListEvent> from,
+                    State<PriceListStatus, PriceListEvent> to
+            ) {
                 log.info("State changed from {} to {}", from == null ? "NONE" : from.getId(), to.getId());
             }
 
@@ -110,7 +115,7 @@ public class PriceListStateMachineConfiguration extends EnumStateMachineConfigur
         };
     }
 
-    private Action<PriceListState, PriceListEvent> getAction(String actionName) {
+    private Action<PriceListStatus, PriceListEvent> getAction(String actionName) {
         var action = actions.get(actionName);
         if (action == null) {
             log.error("Action not found: {}", actionName);

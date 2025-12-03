@@ -2,7 +2,7 @@ package kz.offerprocessservice.service.statemachine;
 
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.service.PriceListService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +20,12 @@ import static kz.offerprocessservice.configuration.PriceListStateMachineConfigur
 @RequiredArgsConstructor
 public class PriceListStateMachineService {
 
-    private final StateMachineFactory<PriceListState, PriceListEvent> stateMachineFactory;
+    private final StateMachineFactory<PriceListStatus, PriceListEvent> stateMachineFactory;
     private final PriceListService priceListService;
 
     public void sendEvent(String priceListId, PriceListEvent event) throws CustomException {
-        PriceListState state = priceListService.getCurrentState(priceListId);
-        StateMachine<PriceListState, PriceListEvent> stateMachine = stateMachineFactory.getStateMachine();
+        PriceListStatus state = priceListService.getCurrentState(priceListId);
+        StateMachine<PriceListStatus, PriceListEvent> stateMachine = stateMachineFactory.getStateMachine();
         stateMachine.stopReactively().subscribe();
         stateMachine.getStateMachineAccessor()
                 .doWithAllRegions(access -> access.resetStateMachineReactively(

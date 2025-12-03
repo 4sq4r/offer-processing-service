@@ -32,18 +32,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NotNull WebRequest request
     ) {
         Map<String, String> invalidFields = e.getFieldErrors().stream()
-                .collect(
-                        toMap(
-                                FieldError::getField,
-                                fe -> Optional.ofNullable(fe.getDefaultMessage()).orElse("Invalid value"),
-                                (existing, replacement) -> replacement
-                        )
+                .collect(toMap(
+                                 FieldError::getField,
+                                 fe -> Optional.ofNullable(fe.getDefaultMessage()).orElse("Invalid value")
+                         )
                 );
-        ErrorResponseDTO errorResponseDTO = buildErrorResponse(
-                status.value(),
-                "Validation Error",
-                invalidFields
-        );
+        ErrorResponseDTO errorResponseDTO = ErrorResponseDTO.builder()
+                .dateTime(LocalDateTime.now())
+                .code(status.value())
+                .message("Validation Error")
+                .invalidFields(invalidFields)
+                .build();
 
         return new ResponseEntity<>(errorResponseDTO, status);
     }

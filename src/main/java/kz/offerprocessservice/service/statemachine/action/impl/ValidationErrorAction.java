@@ -2,7 +2,7 @@ package kz.offerprocessservice.service.statemachine.action.impl;
 
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
@@ -21,10 +21,10 @@ public class ValidationErrorAction extends PriceListAction {
     @Override
     public void doExecute(
             String priceListId,
-            StateContext<PriceListState, PriceListEvent> context
+            StateContext<PriceListStatus, PriceListEvent> context
     ) throws CustomException {
         PriceListEntity ple = priceListService.findEntityById(priceListId);
-        ple.setStatus(PriceListState.VALIDATION_FAILED);
+        ple.setStatus(PriceListStatus.VALIDATION_FAILED);
         priceListService.updateOne(ple);
     }
 }

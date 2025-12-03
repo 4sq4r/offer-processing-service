@@ -1,7 +1,13 @@
 package kz.offerprocessservice.model.entity;
 
-import jakarta.persistence.*;
-import kz.offerprocessservice.model.PriceListState;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.enums.FileFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +29,7 @@ public class PriceListEntity extends BaseEntity {
     private MerchantEntity merchant;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private PriceListState status;
+    private PriceListStatus status;
     @Column(name = "fail_reason")
     private String failReason;
     @Column(nullable = false)

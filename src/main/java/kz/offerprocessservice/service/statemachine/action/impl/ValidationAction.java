@@ -4,7 +4,7 @@ import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.file.validation.FileValidationStrategy;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.service.MinioService;
@@ -34,18 +34,16 @@ public class ValidationAction extends PriceListAction {
     private final FileStrategyProviderImpl fileStrategyProvider;
 
     @Override
-    public void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) {
+    public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
         try {
-            log.info("Handling file upload event: {}", priceListId);
             PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-            priceListEntity.setStatus(PriceListState.VALIDATION);
+            priceListEntity.setStatus(PriceListStatus.VALIDATION);
             priceListEntity.setUpdatedAt(LocalDateTime.now());
             priceListService.updateOne(priceListEntity);
 
             boolean validated = validate(priceListEntity);
 
             priceListValidationRabbitProducer.sendValidationResult(priceListId, validated);
-            log.info("Validation price list for {} ended with result: {}", priceListId, validated);
         } catch (CustomException e) {
             log.error("Error processing file upload event: {}", e.getMessage());
         }
@@ -53,7 +51,8 @@ public class ValidationAction extends PriceListAction {
 
     private boolean validate(PriceListEntity priceListEntity) throws CustomException {
         FileFormat fileFormat = priceListEntity.getFormat();
-        Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(priceListEntity.getMerchant().getId());
+        Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(
+                priceListEntity.getMerchant().getId());
 
         if (!fileFormat.equals(FileFormat.XML)) {
             warehouseNames.add(FileUtils.OFFER_CODE);
@@ -61,21 +60,21 @@ public class ValidationAction extends PriceListAction {
         }
 
         FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(fileFormat);
-        PriceListState status;
+        PriceListStatus status;
         String failReason = null;
 
         try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl())) {
             if (validationStrategy.validate(inputStream, warehouseNames)) {
-                status = PriceListState.VALIDATED;
+                status = PriceListStatus.VALIDATED;
             } else {
                 failReason = "Incorrect warehouse names.";
-                status = PriceListState.VALIDATION_FAILED;
+                status = PriceListStatus.VALIDATION_FAILED;
             }
         } catch (Exception e) {
             failReason = "Unable to validate file: " + e.getMessage();
-            status = PriceListState.VALIDATION_FAILED;
+            status = PriceListStatus.VALIDATION_FAILED;
         }
 
-        return status == PriceListState.VALIDATED;
+        return status == PriceListStatus.VALIDATED;
     }
 }

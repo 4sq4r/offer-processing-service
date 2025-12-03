@@ -1,20 +1,22 @@
 package kz.offerprocessservice.service.statemachine.action.impl;
 
-import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.exception.PriceListActionException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
+import kz.offerprocessservice.model.entity.PriceListEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import java.time.LocalDateTime;
+
 import static kz.offerprocessservice.configuration.PriceListStateMachineConfiguration.PRICE_LIST_ID_HEADER;
 
 @Slf4j
-public abstract class PriceListAction implements Action<PriceListState, PriceListEvent> {
+public abstract class PriceListAction implements Action<PriceListStatus, PriceListEvent> {
 
     @Override
-    public void execute(StateContext<PriceListState, PriceListEvent> context) {
+    public void execute(StateContext<PriceListStatus, PriceListEvent> context) {
         String priceListId = String.valueOf(context.getMessageHeader(PRICE_LIST_ID_HEADER));
         try {
             doExecute(priceListId, context);
@@ -32,6 +34,20 @@ public abstract class PriceListAction implements Action<PriceListState, PriceLis
         }
     }
 
-    protected abstract void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context)
-            throws CustomException;
+    protected abstract void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context);
+
+    protected void updateStatus(
+            PriceListEntity priceListEntity,
+            PriceListStatus status,
+            String failReason
+    ) {
+        updateStatus(priceListEntity, status);
+        priceListEntity.setFailReason(failReason);
+    }
+
+    protected void updateStatus(PriceListEntity priceListEntity, PriceListStatus status) {
+        priceListEntity.setStatus(status);
+        priceListEntity.setUpdatedAt(LocalDateTime.now());
+    }
+
 }

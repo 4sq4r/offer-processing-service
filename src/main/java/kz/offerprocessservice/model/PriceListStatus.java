@@ -1,6 +1,6 @@
 package kz.offerprocessservice.model;
 
-public enum PriceListState {
+public enum PriceListStatus {
     UPLOADED,
     VALIDATION,
     VALIDATED,

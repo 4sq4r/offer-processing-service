@@ -3,7 +3,7 @@ package kz.offerprocessservice.service.statemachine.action;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.exception.PriceListActionException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.statemachine.action.impl.PriceListAction;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,17 +30,17 @@ public abstract class AbstractPriceListActionTest<T extends PriceListAction> {
     protected PriceListService priceListService;
 
     @Mock
-    protected StateContext<PriceListState, PriceListEvent> context;
+    protected StateContext<PriceListStatus, PriceListEvent> context;
 
     @Mock
     protected Message<PriceListEvent> message;
 
 
     @Mock
-    protected State<PriceListState, PriceListEvent> sourceState;
+    protected State<PriceListStatus, PriceListEvent> sourceState;
 
     @Mock
-    protected State<PriceListState, PriceListEvent> targetState;
+    protected State<PriceListStatus, PriceListEvent> targetState;
 
     protected T action;
 
@@ -57,11 +57,10 @@ public abstract class AbstractPriceListActionTest<T extends PriceListAction> {
         when(context.getMessageHeader(PRICE_LIST_ID_HEADER)).thenReturn(PRICE_LIST_ID);
         doThrow(new CustomException(HttpStatus.BAD_REQUEST, "fail"))
                 .when(priceListService).findEntityById(PRICE_LIST_ID);
-
         when(context.getSource()).thenReturn(sourceState);
         when(context.getTarget()).thenReturn(targetState);
-        when(sourceState.getId()).thenReturn(PriceListState.UPLOADED);
-        when(targetState.getId()).thenReturn(PriceListState.PROCESSING);
+        when(sourceState.getId()).thenReturn(PriceListStatus.UPLOADED);
+        when(targetState.getId()).thenReturn(PriceListStatus.PROCESSING);
 
         // when
         PriceListActionException exception = assertThrows(
@@ -70,7 +69,9 @@ public abstract class AbstractPriceListActionTest<T extends PriceListAction> {
         );
 
         // then
-        assertThat(exception.getCause()).isInstanceOf(CustomException.class);
+        assertThat(exception.getCause())
+                .isInstanceOf(CustomException.class)
+                .hasMessage("fail");
         assertThat(exception.getPriceListId()).isEqualTo(PRICE_LIST_ID);
     }
 }

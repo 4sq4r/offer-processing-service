@@ -2,7 +2,7 @@ package kz.offerprocessservice.service.statemachine.action.impl;
 
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
@@ -21,10 +21,10 @@ public class PartiallyProcessedAction extends PriceListAction {
     @Override
     public void doExecute(
             String priceListId,
-            StateContext<PriceListState, PriceListEvent> context
+            StateContext<PriceListStatus, PriceListEvent> context
     ) throws CustomException {
         PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-        priceListEntity.setStatus(PriceListState.PARTIALLY_PROCESSED);
+        priceListEntity.setStatus(PriceListStatus.PARTIALLY_PROCESSED);
         priceListService.updateOne(priceListEntity);
     }
 }

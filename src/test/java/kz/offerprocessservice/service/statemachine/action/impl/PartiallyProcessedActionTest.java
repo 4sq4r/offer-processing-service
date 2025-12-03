@@ -8,8 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static kz.offerprocessservice.configuration.PriceListStateMachineConfiguration.PRICE_LIST_ID_HEADER;
-import static kz.offerprocessservice.model.PriceListState.PARTIALLY_PROCESSED;
-import static kz.offerprocessservice.model.PriceListState.PROCESSING;
+import static kz.offerprocessservice.model.PriceListStatus.PARTIALLY_PROCESSED;
+import static kz.offerprocessservice.model.PriceListStatus.PROCESSING;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

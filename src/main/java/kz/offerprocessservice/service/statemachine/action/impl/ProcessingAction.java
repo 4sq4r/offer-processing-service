@@ -3,7 +3,7 @@ package kz.offerprocessservice.service.statemachine.action.impl;
 import kz.offerprocessservice.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.PriceListState;
+import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
 import kz.offerprocessservice.model.entity.MerchantEntity;
 import kz.offerprocessservice.model.entity.OfferEntity;
@@ -46,9 +46,9 @@ public class ProcessingAction extends PriceListAction {
     private final MinioService minioService;
 
     @Override
-    public void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) {
+    public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
         PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-        priceListEntity.setStatus(PriceListState.PROCESSING);
+        priceListEntity.setStatus(PriceListStatus.PROCESSING);
         priceListService.updateOne(priceListEntity);
         parse(priceListEntity);
     }
@@ -72,7 +72,7 @@ public class ProcessingAction extends PriceListAction {
                 }
             }
 
-            updatePriceListStatus(priceListEntity, PriceListState.PROCESSED, null);
+            updatePriceListStatus(priceListEntity, PriceListStatus.PROCESSED, null);
         } catch (SAXException e) {
             handleParsingError(priceListEntity, e);
         } catch (IOException e) {
@@ -136,10 +136,10 @@ public class ProcessingAction extends PriceListAction {
     }
 
     private void handleParsingError(PriceListEntity priceListEntity, Exception e) {
-        updatePriceListStatus(priceListEntity, PriceListState.PROCESSING_FAILED, e.toString());
+        updatePriceListStatus(priceListEntity, PriceListStatus.PROCESSING_FAILED, e.toString());
     }
 
-    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListState status, String failReason) {
+    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListStatus status, String failReason) {
         priceListEntity.setStatus(status);
         priceListEntity.setFailReason(failReason);
         priceListService.updateOne(priceListEntity);
