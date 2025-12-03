@@ -41,12 +41,9 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public PriceListEntity findEntityById(String id) throws CustomException {
+    public PriceListEntity findEntityById(String id) {
         return priceListRepository.findById(id).orElseThrow(
-                () -> CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.PRICE_LIST_NOT_FOUND.getText(id))
-                        .build()
+                () -> new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.PRICE_LIST_NOT_FOUND.getText(id))
         );
     }
 
@@ -55,7 +52,7 @@ public class PriceListService {
         priceListRepository.save(priceListEntity);
     }
 
-    public PriceListState getCurrentState(String id) throws CustomException {
+    public PriceListState getCurrentState(String id) {
         return findEntityById(id).getStatus();
     }
 }

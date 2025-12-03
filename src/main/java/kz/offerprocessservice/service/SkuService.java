@@ -20,7 +20,7 @@ public class SkuService {
     private final SkuMapper mapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public SkuDTO saveOne(SkuDTO dto) throws CustomException {
+    public SkuDTO saveOne(SkuDTO dto) {
         dto.setName(validateName(dto.getName()));
         SkuEntity entity = mapper.toEntity(dto);
         repository.save(entity);
@@ -28,22 +28,17 @@ public class SkuService {
         return mapper.toDTO(entity);
     }
 
-    public SkuDTO getOne(String id) throws CustomException {
+    public SkuDTO getOne(String id) {
         return mapper.toDTO(repository.findById(id).orElseThrow(
-                () -> CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.SKU_NOT_FOUND.getText(id))
-                        .build()));
+                () -> new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.SKU_NOT_FOUND.getText(id)))
+        );
     }
 
-    private String validateName(String name) throws CustomException {
+    private String validateName(String name) {
         name = name.trim();
 
         if (repository.existsByNameIgnoreCase(name)) {
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.MERCHANT_ALREADY_EXISTS.getText(name))
-                    .build();
+            throw new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.MERCHANT_ALREADY_EXISTS.getText(name));
         }
 
         return name;

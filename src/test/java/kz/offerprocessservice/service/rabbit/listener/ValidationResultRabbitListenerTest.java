@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.http.HttpStatus;
 
 import java.util.stream.Stream;
 
@@ -55,10 +56,10 @@ class ValidationResultRabbitListenerTest extends AbstractRabbitListenerTest<Vali
         // given
         ValidationResultMessage message = new ValidationResultMessage(PRICE_LIST_ID, true);
 
-        doThrow(CustomException.builder()
-                .message("fail")
-                .build()).when(stateMachineService)
-                .sendEvent(PRICE_LIST_ID, PriceListEvent.VALIDATION_SUCCESS);
+        doThrow(
+                new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "fail")
+        )
+                .when(stateMachineService).sendEvent(PRICE_LIST_ID, PriceListEvent.VALIDATION_SUCCESS);
 
         // then
         assertThrows(CustomException.class, () -> listener.handle(message));

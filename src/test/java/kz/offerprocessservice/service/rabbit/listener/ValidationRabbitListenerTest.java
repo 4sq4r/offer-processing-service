@@ -4,6 +4,7 @@ import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.dto.rabbit.RabbitMessage;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
@@ -19,25 +20,23 @@ class ValidationRabbitListenerTest extends AbstractRabbitListenerTest<Validation
     }
 
     @Override
-    protected void handle(RabbitMessage message) throws Exception {
+    protected void handle(RabbitMessage message) {
         listener.handle(message);
     }
 
     @Test
-    void handle_throwsCustomException() throws CustomException {
+    void handle_throwsCustomException() {
         // given
         RabbitMessage message = new RabbitMessage();
         message.setPriceListId(PRICE_LIST_ID);
-        doThrow(CustomException.builder()
-                .message("fail")
-                .build()).when(stateMachineService)
+        doThrow(new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "fail")).when(stateMachineService)
                 .sendEvent(PRICE_LIST_ID, PriceListEvent.START_VALIDATION);
         // then
         assertThrows(CustomException.class, () -> listener.handle(message));
     }
 
     @Test
-    void handle_sendsEvent() throws CustomException {
+    void handle_sendsEvent() {
         // given
         RabbitMessage message = new RabbitMessage();
         message.setPriceListId(PRICE_LIST_ID);

@@ -16,7 +16,7 @@ public class CityService {
     private final CityRepository repository;
 
     @Transactional(rollbackFor = Exception.class)
-    public CityEntity saveOne(String name) throws CustomException {
+    public CityEntity saveOne(String name) {
         validateCityName(name);
         String trimmedName = name.trim();
         isExists(trimmedName);
@@ -28,41 +28,29 @@ public class CityService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void deleteOne(String id) throws CustomException {
+    public void deleteOne(String id) {
         repository.delete(findById(id));
     }
 
-    private void validateCityName(String cityName) throws CustomException {
+    private void validateCityName(String cityName) {
         if (cityName == null || cityName.trim().isEmpty()) {
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName))
-                    .build();
+            throw new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName));
         }
 
         if (cityName.matches(".*\\d.*")) {
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName))
-                    .build();
+            throw new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName));
         }
     }
 
-    private void isExists(String name) throws CustomException {
+    private void isExists(String name) {
         if (repository.existsByNameIgnoreCase(name)) {
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.CITY_ALREADY_EXISTS.getText(name))
-                    .build();
+            throw new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_ALREADY_EXISTS.getText(name));
         }
     }
 
-    public CityEntity findById(String id) throws CustomException {
+    public CityEntity findById(String id) {
         return repository.findById(id).orElseThrow(
-                () -> CustomException.builder()
-                        .httpStatus(HttpStatus.NOT_FOUND)
-                        .message(ErrorMessageSource.CITY_NOT_FOUND.getText(id))
-                        .build()
+                () -> new CustomException(HttpStatus.NOT_FOUND, ErrorMessageSource.CITY_NOT_FOUND.getText(id))
         );
     }
 }

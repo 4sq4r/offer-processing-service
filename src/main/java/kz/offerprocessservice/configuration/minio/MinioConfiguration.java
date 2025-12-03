@@ -3,7 +3,12 @@ package kz.offerprocessservice.configuration.minio;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import io.minio.errors.*;
+import io.minio.errors.ErrorResponseException;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.InvalidResponseException;
+import io.minio.errors.ServerException;
+import io.minio.errors.XmlParserException;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.util.ErrorMessageSource;
 import lombok.RequiredArgsConstructor;
@@ -42,15 +47,15 @@ public class MinioConfiguration {
         );
 
         if (!isBucketExist) {
-            if (minioProperties.getAutoCreateBucket()) {
+            if (Boolean.TRUE.equals(minioProperties.getAutoCreateBucket())) {
                 minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(bucket)
-                        .build());
+                                               .bucket(bucket)
+                                               .build());
             } else {
-                throw CustomException.builder()
-                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .message(ErrorMessageSource.MINIO_BUCKET_NOT_EXIST.getText(bucket))
-                        .build();
+                throw new CustomException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ErrorMessageSource.MINIO_BUCKET_NOT_EXIST.getText(bucket)
+                );
             }
         }
 

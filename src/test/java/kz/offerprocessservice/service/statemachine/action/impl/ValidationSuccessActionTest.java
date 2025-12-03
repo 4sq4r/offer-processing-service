@@ -1,6 +1,5 @@
 package kz.offerprocessservice.service.statemachine.action.impl;
 
-import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListState;
 import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.service.rabbit.producer.PriceListProcessingProducer;
@@ -29,7 +28,7 @@ class ValidationSuccessActionTest extends AbstractPriceListActionTest<Validation
     }
 
     @Test
-    void execute_shouldCallDoExecuteAndUpdateStatus() throws CustomException {
+    void execute_callsDoExecute() {
         //given
         PriceListEntity priceListEntity = new PriceListEntity();
         priceListEntity.setStatus(PriceListState.VALIDATION);

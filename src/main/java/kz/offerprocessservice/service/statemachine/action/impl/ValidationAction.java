@@ -12,7 +12,6 @@ import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.service.rabbit.producer.PriceListValidationRabbitProducer;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
-import kz.offerprocessservice.service.statemachine.action.PriceListAction;
 import kz.offerprocessservice.util.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,7 @@ import java.util.Set;
 @Slf4j
 @Component(ActionNames.START_VALIDATION)
 @RequiredArgsConstructor
-public class ValidationAction implements PriceListAction {
+public class ValidationAction extends PriceListAction {
 
     private final PriceListValidationRabbitProducer priceListValidationRabbitProducer;
     private final MinioService minioService;

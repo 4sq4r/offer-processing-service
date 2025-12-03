@@ -23,18 +23,20 @@ public class MinioService {
     private final MinioProperties minioProperties;
     private final MinioClient client;
 
-    public MinioMetaData uploadFile(MultipartFile file) throws CustomException {
+    public MinioMetaData uploadFile(MultipartFile file) {
         String[] split = file.getOriginalFilename().split("\\.");
         String format = split[split.length - 1];
         String name = UUID.randomUUID() + "." + format;
         String url = minioProperties.getFileFormat().formatted(minioProperties.getPriceListsUrl(), name);
         try {
-            client.putObject(PutObjectArgs.builder()
-                    .stream(file.getInputStream(), file.getSize(), minioProperties.getPartSize())
-                    .contentType(file.getContentType())
-                    .bucket(minioProperties.getBucket())
-                    .object(url)
-                    .build());
+            client.putObject(
+                    PutObjectArgs.builder()
+                            .stream(file.getInputStream(), file.getSize(), minioProperties.getPartSize())
+                            .contentType(file.getContentType())
+                            .bucket(minioProperties.getBucket())
+                            .object(url)
+                            .build()
+            );
 
             return MinioMetaData.builder()
                     .fileName(name)
@@ -43,27 +45,21 @@ public class MinioService {
                     .build();
         } catch (Exception e) {
             log.error("Unable to upload file: {}\n {}", url, e.getMessage());
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .message(e.getMessage())
-                    .build();
+            throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    public InputStream getFile(String url) throws CustomException {
+    public InputStream getFile(String url) {
         String trimmedUrl = url.replaceFirst(minioProperties.getPrefixToDelete(), "");
         try {
             return client.getObject(GetObjectArgs.builder()
-                    .bucket(minioProperties.getBucket())
-                    .object(trimmedUrl)
-                    .build());
+                                            .bucket(minioProperties.getBucket())
+                                            .object(trimmedUrl)
+                                            .build());
 
         } catch (Exception e) {
             log.error("Unable to get file: {}\n {}", trimmedUrl, e.getMessage());
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .message(e.getMessage())
-                    .build();
+            throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

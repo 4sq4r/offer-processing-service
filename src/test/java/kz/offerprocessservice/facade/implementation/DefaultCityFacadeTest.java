@@ -47,10 +47,8 @@ class DefaultCityFacadeTest {
         //given
         CityDTO cityDTO = new CityDTO();
         cityDTO.setName(CITY_NAME);
-        when(service.saveOne(CITY_NAME)).thenThrow(CustomException.builder()
-                .httpStatus(HttpStatus.BAD_REQUEST)
-                .message(ErrorMessageSource.CITY_ALREADY_EXISTS.getText(CITY_NAME))
-                .build()
+        when(service.saveOne(CITY_NAME)).thenThrow(
+                new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_ALREADY_EXISTS.getText(CITY_NAME))
         );
         //when
         CustomException exception = assertThrows(CustomException.class, () -> underTest.saveOne(cityDTO));
@@ -81,10 +79,8 @@ class DefaultCityFacadeTest {
     @Test
     void findOne_throwsException_whenCityNotFound() throws CustomException {
         //given
-        when(service.findById(ID)).thenThrow(CustomException.builder()
-                .httpStatus(HttpStatus.BAD_REQUEST)
-                .message(ErrorMessageSource.CITY_NOT_FOUND.getText(ID))
-                .build()
+        when(service.findById(ID)).thenThrow(
+                new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_NOT_FOUND.getText(ID))
         );
         //when
         CustomException exception = assertThrows(CustomException.class, () -> underTest.findOne(ID));
@@ -114,10 +110,7 @@ class DefaultCityFacadeTest {
     void deleteOne_throwsException_whenCityNotFound() throws CustomException {
         //given
         doThrow(
-                CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.CITY_NOT_FOUND.getText(ID))
-                        .build()
+                new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_NOT_FOUND.getText(ID))
         )
                 .when(service)
                 .deleteOne(ID);

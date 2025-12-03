@@ -23,10 +23,11 @@ public class WarehouseService {
     private final WarehouseRepository repository;
 
     @Transactional(rollbackFor = CustomException.class)
-    public WarehouseEntity saveOne(String name,
-                                   MerchantEntity merchantEntity,
-                                   CityEntity cityEntity
-    ) throws CustomException {
+    public WarehouseEntity saveOne(
+            String name,
+            MerchantEntity merchantEntity,
+            CityEntity cityEntity
+    ) {
         validateName(name, merchantEntity.getId());
         WarehouseEntity entity = new WarehouseEntity();
         entity.setName(name.trim());
@@ -37,7 +38,7 @@ public class WarehouseService {
         return repository.save(entity);
     }
 
-    public WarehouseEntity getOne(String id) throws CustomException {
+    public WarehouseEntity getOne(String id) {
         return findEntityById(id);
     }
 
@@ -53,27 +54,26 @@ public class WarehouseService {
     }
 
     @Transactional(rollbackFor = CustomException.class)
-    public void deleteOne(String id) throws CustomException {
+    public void deleteOne(String id) {
         repository.delete(findEntityById(id));
     }
 
 
-    private void validateName(String name, String merchantId) throws CustomException {
+    private void validateName(String name, String merchantId) {
         if (repository.existsByNameIgnoreCaseAndMerchantId(name, merchantId)) {
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.POINT_OF_SALE_ALREADY_EXISTS.getText(name))
-                    .build();
+            throw new CustomException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorMessageSource.POINT_OF_SALE_ALREADY_EXISTS.getText(name)
+            );
         }
-
     }
 
-    private WarehouseEntity findEntityById(String id) throws CustomException {
+    private WarehouseEntity findEntityById(String id) {
         return repository.findById(id).orElseThrow(
-                () -> CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.POINT_OF_SALE_NOT_FOUND.getText(id))
-                        .build()
+                () -> new CustomException(
+                        HttpStatus.BAD_REQUEST,
+                        ErrorMessageSource.POINT_OF_SALE_ALREADY_EXISTS.getText(id)
+                )
         );
     }
 }

@@ -79,10 +79,7 @@ class PriceListProcessorTest {
     void uploadPriceList_throwsException_whenMerchantNotFound() throws CustomException {
         //given
         when(merchantService.findEntityById(ID))
-                .thenThrow(CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(ID))
-                        .build());
+                .thenThrow(new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(ID)));
         //when
         CustomException exception = assertThrows(CustomException.class, () -> underTest.uploadPriceList(ID, multipartFile));
         //then

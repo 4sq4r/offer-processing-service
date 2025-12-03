@@ -11,8 +11,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 class GlobalExceptionHandlerTest {
@@ -42,7 +42,8 @@ class GlobalExceptionHandlerTest {
         WebRequest request = mock(WebRequest.class);
 
         ResponseEntity<Object> response =
-                handler.handleMethodArgumentNotValid(methodArgumentNotValidException, headers, HttpStatus.BAD_REQUEST, request);
+                handler.handleMethodArgumentNotValid(
+                        methodArgumentNotValidException, headers, HttpStatus.BAD_REQUEST, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
@@ -55,16 +56,13 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleCustomException_returnsCustomErrorResponse() {
-        CustomException exception = CustomException.builder()
-                .httpStatus(HttpStatus.NOT_FOUND)
-                .message("Something bad")
-                .build();
+        CustomException exception = new CustomException(HttpStatus.NOT_FOUND, "Something went wrong");
 
         ResponseEntity<ErrorResponseDTO> response = handler.handleCustomException(exception);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Something bad", response.getBody().getMessage());
+        assertEquals("Something went wrong", response.getBody().getMessage());
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getCode());
     }
 }

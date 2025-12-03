@@ -1,6 +1,5 @@
 package kz.offerprocessservice.facade;
 
-import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.mapper.WarehouseMapper;
 import kz.offerprocessservice.model.dto.WarehouseDTO;
 import kz.offerprocessservice.model.entity.WarehouseEntity;
@@ -15,7 +14,7 @@ public class WarehouseFacade {
     private final WarehouseMapper mapper;
     private final WarehouseProcessor processor;
 
-    public WarehouseDTO saveOne(WarehouseDTO warehouseDTO) throws CustomException {
+    public WarehouseDTO saveOne(WarehouseDTO warehouseDTO) {
         WarehouseEntity entity = processor.createWarehouse(
                 warehouseDTO.getName(),
                 warehouseDTO.getMerchantId(),
@@ -25,11 +24,11 @@ public class WarehouseFacade {
         return mapper.toDTO(entity);
     }
 
-    public WarehouseDTO getOne(String warehouseId) throws CustomException {
+    public WarehouseDTO getOne(String warehouseId) {
         return mapper.toDTO(processor.getWarehouseById(warehouseId));
     }
 
-    public void deleteOne(String warehouseId) throws CustomException {
+    public void deleteOne(String warehouseId) {
         processor.deleteOne(warehouseId);
     }
 }

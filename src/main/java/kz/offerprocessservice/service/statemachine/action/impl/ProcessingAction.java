@@ -1,6 +1,5 @@
 package kz.offerprocessservice.service.statemachine.action.impl;
 
-import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.model.PriceListEvent;
@@ -19,7 +18,6 @@ import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.StockService;
 import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
-import kz.offerprocessservice.service.statemachine.action.PriceListAction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
@@ -37,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component(ActionNames.START_PROCESSING)
 @RequiredArgsConstructor
-public class ProcessingAction implements PriceListAction {
+public class ProcessingAction extends PriceListAction {
 
     private final OfferService offerService;
     private final StockService stockService;
@@ -49,32 +47,26 @@ public class ProcessingAction implements PriceListAction {
 
     @Override
     public void doExecute(String priceListId, StateContext<PriceListState, PriceListEvent> context) {
-        try {
-            PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-            priceListEntity.setStatus(PriceListState.PROCESSING);
-            priceListService.updateOne(priceListEntity);
-            parse(priceListEntity);
-        } catch (IOException e) {
-            log.info("Unable to process file: {}", e.getMessage());
-        } catch (URISyntaxException e) {
-            log.info("Unable to parse file: {}", e.getMessage());
-        } catch (CustomException e) {
-            throw new RuntimeException(e);
-        }
+        PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
+        priceListEntity.setStatus(PriceListState.PROCESSING);
+        priceListService.updateOne(priceListEntity);
+        parse(priceListEntity);
     }
 
-    private void parse(PriceListEntity priceListEntity) throws CustomException, IOException, URISyntaxException {
+    private void parse(PriceListEntity priceListEntity) {
         try {
             InputStream inputStream = minioService.getFile(priceListEntity.getUrl());
             MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchant().getId());
-            FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(priceListEntity.getFormat());
+            FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(
+                    priceListEntity.getFormat());
             Set<PriceListItemDTO> priceListItems = fileProcessingStrategy.extract(inputStream);
 
             if (!priceListItems.isEmpty()) {
                 Set<OfferEntity> offers = saveOffers(priceListItems, me);
 
                 if (!offers.isEmpty()) {
-                    Map<String, WarehouseEntity> warehouseMap = warehouseService.getAllWarehousesByMerchantId(me.getId()).stream()
+                    Map<String, WarehouseEntity> warehouseMap = warehouseService.getAllWarehousesByMerchantId(
+                                    me.getId()).stream()
                             .collect(Collectors.toMap(WarehouseEntity::getName, wh -> wh));
                     saveStocks(priceListItems, offers, warehouseMap);
                 }
@@ -83,6 +75,10 @@ public class ProcessingAction implements PriceListAction {
             updatePriceListStatus(priceListEntity, PriceListState.PROCESSED, null);
         } catch (SAXException e) {
             handleParsingError(priceListEntity, e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -20,7 +20,7 @@ public class MerchantService {
     private final MerchantMapper mapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public MerchantDTO saveOne(MerchantDTO dto) throws CustomException {
+    public MerchantDTO saveOne(MerchantDTO dto) {
         dto.setName(validateName(dto.getName()));
         MerchantEntity entity = mapper.toEntity(dto);
         repository.save(entity);
@@ -28,23 +28,23 @@ public class MerchantService {
         return mapper.toDTO(entity);
     }
 
-    public MerchantDTO getOne(String id) throws CustomException {
+    public MerchantDTO getOne(String id) {
         return mapper.toDTO(findEntityById(id));
     }
 
-    public void deleteOne(String id) throws CustomException {
+    public void deleteOne(String id) {
         MerchantEntity entity = findEntityById(id);
         repository.delete(entity);
     }
 
-    private String validateName(String name) throws CustomException {
+    private String validateName(String name) {
         name = name.trim();
 
         if (repository.existsByNameIgnoreCase(name)) {
-            throw CustomException.builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message(ErrorMessageSource.MERCHANT_ALREADY_EXISTS.getText(name))
-                    .build();
+            throw new CustomException(
+                    HttpStatus.BAD_REQUEST,
+                    ErrorMessageSource.MERCHANT_ALREADY_EXISTS.getText(name)
+            );
         }
 
         return name;
@@ -54,12 +54,9 @@ public class MerchantService {
         return repository.existsById(id);
     }
 
-    public MerchantEntity findEntityById(String id) throws CustomException {
+    public MerchantEntity findEntityById(String id) {
         return repository.findById(id).orElseThrow(
-                () -> CustomException.builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id))
-                        .build()
+                () -> new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id))
         );
     }
 }
