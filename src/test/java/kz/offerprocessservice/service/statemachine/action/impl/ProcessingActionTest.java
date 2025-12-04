@@ -17,8 +17,6 @@
 //import org.mockito.Mock;
 //import org.xml.sax.SAXException;
 //
-//import java.io.ByteArrayInputStream;
-//
 //import static kz.offerprocessservice.configuration.PriceListStateMachineConfiguration.PRICE_LIST_ID_HEADER;
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 //import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -84,12 +82,13 @@
 //        when(sourceState.getId()).thenReturn(PriceListStatus.UPLOADED);
 //        when(targetState.getId()).thenReturn(PriceListStatus.PROCESSING);
 //        when(priceListService.findEntityById(PRICE_LIST_ID)).thenReturn(priceListEntity);
-//        when(minioService.getFile(any())).thenReturn(new ByteArrayInputStream("<items></items>".getBytes()));
+//        when(priceListService.updateOne(priceListEntity)).thenReturn(priceListEntity);
+//        when(minioService.getFile(priceListEntity.getUrl())).thenThrow(new RuntimeException("file not found"));
 //        when(merchantService.findEntityById("m1")).thenReturn(merchant);
 //        when(fileStrategyProvider.getProcessingStrategy(FileFormat.XML))
 //                .thenReturn(xmlProcessingStrategy);
 //        when(xmlProcessingStrategy.extract(any()))
-//                .thenThrow(new SAXException("parse fail"));
+//                .thenThrow(new IllegalArgumentException("parse fail"));
 //
 //        //when
 //        PriceListActionException exception = assertThrows(
@@ -98,10 +97,15 @@
 //        );
 //
 //        //then
+//
+//        assertEquals(PriceListStatus.PROCESSING_FAILED, priceListEntity.getStatus());
+//        assertTrue(entity.getFailReason().contains("Unable to validate file: file not found"));
+//        verify(priceListService, atLeastOnce()).updateOne(priceListEntity);
+//        verify(priceListValidationRabbitProducer)
+//                .sendValidationResult(PRICE_LIST_ID, false);
 //        verify(priceListService, atLeastOnce()).updateOne(priceListEntity);
 //        assertEquals(PriceListStatus.PROCESSING_FAILED, priceListEntity.getStatus());
 //        assertTrue(priceListEntity.getFailReason().contains("parse fail"));
-//
 //        assertEquals(PRICE_LIST_ID, exception.getPriceListId());
 //        assertInstanceOf(SAXException.class, exception.getCause());
 //    }
