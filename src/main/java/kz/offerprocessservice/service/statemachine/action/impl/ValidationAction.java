@@ -13,68 +13,85 @@ import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.service.rabbit.producer.PriceListValidationRabbitProducer;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
 import kz.offerprocessservice.util.FileUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
 @Component(ActionNames.START_VALIDATION)
-@RequiredArgsConstructor
 public class ValidationAction extends PriceListAction {
 
     private final PriceListValidationRabbitProducer priceListValidationRabbitProducer;
     private final MinioService minioService;
-    private final PriceListService priceListService;
     private final WarehouseService warehouseService;
     private final FileStrategyProviderImpl fileStrategyProvider;
 
+    public ValidationAction(
+            PriceListService priceListService,
+            PriceListValidationRabbitProducer priceListValidationRabbitProducer,
+            MinioService minioService,
+            WarehouseService warehouseService,
+            FileStrategyProviderImpl fileStrategyProvider
+    ) {
+        super(priceListService);
+        this.priceListValidationRabbitProducer = priceListValidationRabbitProducer;
+        this.minioService = minioService;
+        this.warehouseService = warehouseService;
+        this.fileStrategyProvider = fileStrategyProvider;
+    }
+
     @Override
     public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
-        try {
-            PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-            priceListEntity.setStatus(PriceListStatus.VALIDATION);
-            priceListEntity.setUpdatedAt(LocalDateTime.now());
-            priceListService.updateOne(priceListEntity);
-
-            boolean validated = validate(priceListEntity);
-
-            priceListValidationRabbitProducer.sendValidationResult(priceListId, validated);
-        } catch (CustomException e) {
-            log.error("Error processing file upload event: {}", e.getMessage());
-        }
+        PriceListEntity priceListEntity = updatePriceListStatus(priceListId, PriceListStatus.VALIDATION);
+        boolean validated = validate(priceListEntity);
+        priceListValidationRabbitProducer.sendValidationResult(priceListId, validated);
     }
 
     private boolean validate(PriceListEntity priceListEntity) throws CustomException {
-        FileFormat fileFormat = priceListEntity.getFormat();
-        Set<String> warehouseNames = warehouseService.getAllWarehouseNamesByMerchantId(
-                priceListEntity.getMerchant().getId());
+        Set<String> warehouseNames = prepareWarehouseNames(priceListEntity);
+        FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(
+                priceListEntity.getFormat()
+        );
 
-        if (!fileFormat.equals(FileFormat.XML)) {
+        boolean validated;
+        try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl())) {
+            validated = validationStrategy.validate(inputStream, warehouseNames);
+
+            if (validated) {
+                updatePriceListStatus(priceListEntity, PriceListStatus.VALIDATED);
+            } else {
+                updatePriceListStatus(
+                        priceListEntity,
+                        PriceListStatus.VALIDATION_FAILED,
+                        "Incorrect warehouse names."
+                );
+            }
+        } catch (Exception e) {
+            updatePriceListStatus(
+                    priceListEntity,
+                    PriceListStatus.VALIDATION_FAILED,
+                    "Unable to validate file: " + e.getMessage()
+            );
+            validated = false;
+        }
+        return validated;
+    }
+
+
+    private Set<String> prepareWarehouseNames(PriceListEntity priceListEntity) {
+        Set<String> warehouseNames = new HashSet<>(warehouseService.getAllWarehouseNamesByMerchantId(
+                priceListEntity.getMerchant().getId())
+        );
+
+        if (!priceListEntity.getFormat().equals(FileFormat.XML)) {
             warehouseNames.add(FileUtils.OFFER_CODE);
             warehouseNames.add(FileUtils.OFFER_NAME);
         }
 
-        FileValidationStrategy validationStrategy = fileStrategyProvider.getValidationStrategy(fileFormat);
-        PriceListStatus status;
-        String failReason = null;
-
-        try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl())) {
-            if (validationStrategy.validate(inputStream, warehouseNames)) {
-                status = PriceListStatus.VALIDATED;
-            } else {
-                failReason = "Incorrect warehouse names.";
-                status = PriceListStatus.VALIDATION_FAILED;
-            }
-        } catch (Exception e) {
-            failReason = "Unable to validate file: " + e.getMessage();
-            status = PriceListStatus.VALIDATION_FAILED;
-        }
-
-        return status == PriceListStatus.VALIDATED;
+        return warehouseNames;
     }
 }

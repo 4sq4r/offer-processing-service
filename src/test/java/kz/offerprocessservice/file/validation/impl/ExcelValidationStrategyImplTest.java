@@ -1,9 +1,11 @@
 package kz.offerprocessservice.file.validation.impl;
 
 import kz.offerprocessservice.file.validation.AbstractValidationStrategyTest;
+import kz.offerprocessservice.model.enums.FileFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -18,6 +20,12 @@ class ExcelValidationStrategyImplTest extends AbstractValidationStrategyTest<Exc
     @Override
     protected ExcelValidationStrategyImpl createStrategy() {
         return new ExcelValidationStrategyImpl();
+    }
+
+    @Test
+    void getFileFormat_returnsExcel() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.EXCEL);
     }
 
     @Test

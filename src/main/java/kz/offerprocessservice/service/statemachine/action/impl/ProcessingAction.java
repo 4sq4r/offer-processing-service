@@ -18,15 +18,11 @@ import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.StockService;
 import kz.offerprocessservice.service.WarehouseService;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -34,28 +30,41 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component(ActionNames.START_PROCESSING)
-@RequiredArgsConstructor
 public class ProcessingAction extends PriceListAction {
 
     private final OfferService offerService;
     private final StockService stockService;
     private final MerchantService merchantService;
-    private final PriceListService priceListService;
     private final WarehouseService warehouseService;
     private final FileStrategyProviderImpl fileStrategyProvider;
     private final MinioService minioService;
 
+    public ProcessingAction(
+            PriceListService priceListService,
+            OfferService offerService,
+            StockService stockService,
+            MerchantService merchantService,
+            WarehouseService warehouseService,
+            FileStrategyProviderImpl fileStrategyProvider,
+            MinioService minioService
+    ) {
+        super(priceListService);
+        this.offerService = offerService;
+        this.stockService = stockService;
+        this.merchantService = merchantService;
+        this.warehouseService = warehouseService;
+        this.fileStrategyProvider = fileStrategyProvider;
+        this.minioService = minioService;
+    }
+
     @Override
     public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
-        PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-        priceListEntity.setStatus(PriceListStatus.PROCESSING);
-        priceListService.updateOne(priceListEntity);
+        PriceListEntity priceListEntity = updatePriceListStatus(priceListId, PriceListStatus.PROCESSING);
         parse(priceListEntity);
     }
 
     private void parse(PriceListEntity priceListEntity) {
-        try {
-            InputStream inputStream = minioService.getFile(priceListEntity.getUrl());
+        try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl())) {
             MerchantEntity me = merchantService.findEntityById(priceListEntity.getMerchant().getId());
             FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(
                     priceListEntity.getFormat());
@@ -72,13 +81,13 @@ public class ProcessingAction extends PriceListAction {
                 }
             }
 
-            updatePriceListStatus(priceListEntity, PriceListStatus.PROCESSED, null);
-        } catch (SAXException e) {
-            handleParsingError(priceListEntity, e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            updatePriceListStatus(priceListEntity.getId(), PriceListStatus.PROCESSED);
+        } catch (Exception e) {
+            updatePriceListStatus(
+                    priceListEntity,
+                    PriceListStatus.PROCESSING_FAILED,
+                    "Failed to parse file: " + e.getMessage()
+            );
         }
     }
 
@@ -133,15 +142,5 @@ public class ProcessingAction extends PriceListAction {
         if (!stocks.isEmpty()) {
             stockService.saveAll(stocks);
         }
-    }
-
-    private void handleParsingError(PriceListEntity priceListEntity, Exception e) {
-        updatePriceListStatus(priceListEntity, PriceListStatus.PROCESSING_FAILED, e.toString());
-    }
-
-    private void updatePriceListStatus(PriceListEntity priceListEntity, PriceListStatus status, String failReason) {
-        priceListEntity.setStatus(status);
-        priceListEntity.setFailReason(failReason);
-        priceListService.updateOne(priceListEntity);
     }
 }

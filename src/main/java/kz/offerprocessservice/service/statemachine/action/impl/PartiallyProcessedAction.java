@@ -1,30 +1,23 @@
 package kz.offerprocessservice.service.statemachine.action.impl;
 
-import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.PriceListStatus;
-import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component(ActionNames.PARTIALLY_PROCESSED)
-@RequiredArgsConstructor
 public class PartiallyProcessedAction extends PriceListAction {
 
-    private final PriceListService priceListService;
+    public PartiallyProcessedAction(PriceListService priceListService) {
+        super(priceListService);
+    }
 
     @Override
-    public void doExecute(
-            String priceListId,
-            StateContext<PriceListStatus, PriceListEvent> context
-    ) throws CustomException {
-        PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-        priceListEntity.setStatus(PriceListStatus.PARTIALLY_PROCESSED);
-        priceListService.updateOne(priceListEntity);
+    public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
+        updatePriceListStatus(priceListId, PriceListStatus.PARTIALLY_PROCESSED);
     }
 }

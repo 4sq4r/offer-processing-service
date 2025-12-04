@@ -1,55 +1,60 @@
 package kz.offerprocessservice.file;
 
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
-import kz.offerprocessservice.file.processing.impl.CsvProcessingStrategyImpl;
-import kz.offerprocessservice.file.processing.impl.ExcelProcessingStrategyImpl;
-import kz.offerprocessservice.file.processing.impl.XmlProcessingStrategyImpl;
 import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
-import kz.offerprocessservice.file.templating.impl.CsvTemplatingStrategyImpl;
-import kz.offerprocessservice.file.templating.impl.ExcelTemplatingStrategyImpl;
-import kz.offerprocessservice.file.templating.impl.XmlTemplatingStrategyImpl;
 import kz.offerprocessservice.file.validation.FileValidationStrategy;
-import kz.offerprocessservice.file.validation.impl.CsvValidationStrategyImpl;
-import kz.offerprocessservice.file.validation.impl.ExcelValidationStrategyImpl;
-import kz.offerprocessservice.file.validation.impl.XmlValidationStrategyImpl;
 import kz.offerprocessservice.model.enums.FileFormat;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 @Component
 public class FileStrategyProviderImpl implements FileStrategyProvider {
 
-    private final Map<FileFormat, FileTemplatingStrategy> templatingStrategies = Map.of(
-            FileFormat.CSV, new CsvTemplatingStrategyImpl(),
-            FileFormat.XML, new XmlTemplatingStrategyImpl(),
-            FileFormat.EXCEL, new ExcelTemplatingStrategyImpl()
-    );
+    private final Map<FileFormat, FileTemplatingStrategy> templatingStrategies;
 
-    private final Map<FileFormat, FileValidationStrategy> validationStrategies = Map.of(
-            FileFormat.CSV, new CsvValidationStrategyImpl(),
-            FileFormat.XML, new XmlValidationStrategyImpl(),
-            FileFormat.EXCEL, new ExcelValidationStrategyImpl()
-    );
+    private final Map<FileFormat, FileValidationStrategy> validationStrategies;
 
-    private final Map<FileFormat, FileProcessingStrategy> processingStrategies = Map.of(
-            FileFormat.CSV, new CsvProcessingStrategyImpl(),
-            FileFormat.XML, new XmlProcessingStrategyImpl(),
-            FileFormat.EXCEL, new ExcelProcessingStrategyImpl()
-    );
+    private final Map<FileFormat, FileProcessingStrategy> processingStrategies;
+
+    public FileStrategyProviderImpl(
+            List<FileTemplatingStrategy> templatingStrategies,
+            List<FileValidationStrategy> validationStrategies,
+            List<FileProcessingStrategy> processingStrategies
+    ) {
+        this.templatingStrategies = templatingStrategies.stream()
+                .collect(toMap(FileTemplatingStrategy::getFileFormat, identity()));
+        this.validationStrategies = validationStrategies.stream()
+                .collect(toMap(FileValidationStrategy::getFileFormat, identity()));
+        this.processingStrategies = processingStrategies.stream()
+                .collect(toMap(FileProcessingStrategy::getFileFormat, identity()));
+    }
 
     @Override
     public FileTemplatingStrategy getTemplatingStrategy(FileFormat ff) {
-        return templatingStrategies.get(ff);
+        return getOrThrow(templatingStrategies, ff);
     }
 
     @Override
     public FileValidationStrategy getValidationStrategy(FileFormat ff) {
-        return validationStrategies.get(ff);
+        return getOrThrow(validationStrategies, ff);
     }
 
     @Override
     public FileProcessingStrategy getProcessingStrategy(FileFormat ff) {
-        return processingStrategies.get(ff);
+        return getOrThrow(processingStrategies, ff);
     }
+
+    private <T> T getOrThrow(Map<FileFormat, T> map, FileFormat fileFormat) {
+        T strategy = map.get(fileFormat);
+        if (strategy == null) {
+            throw new IllegalArgumentException("Strategy not found for format: " + fileFormat);
+        }
+        return strategy;
+    }
+
 }

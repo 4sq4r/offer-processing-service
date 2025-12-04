@@ -35,7 +35,6 @@ public abstract class AbstractPriceListActionTest<T extends PriceListAction> {
     @Mock
     protected Message<PriceListEvent> message;
 
-
     @Mock
     protected State<PriceListStatus, PriceListEvent> sourceState;
 

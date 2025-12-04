@@ -9,8 +9,8 @@ public enum FileFormat {
 
     XML(".xml"),
     CSV(".csv"),
-    EXCEL(".xlsx");
-
+    EXCEL(".xlsx"),
+    ;
     private final String extension;
 
     FileFormat(String extension) {

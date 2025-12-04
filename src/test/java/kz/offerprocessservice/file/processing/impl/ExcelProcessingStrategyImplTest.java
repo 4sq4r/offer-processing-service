@@ -2,9 +2,11 @@ package kz.offerprocessservice.file.processing.impl;
 
 import kz.offerprocessservice.file.processing.AbstractProcessingStrategyTest;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
+import kz.offerprocessservice.model.enums.FileFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +22,12 @@ class ExcelProcessingStrategyImplTest extends AbstractProcessingStrategyTest<Exc
     @Override
     protected ExcelProcessingStrategyImpl createStrategy() {
         return new ExcelProcessingStrategyImpl();
+    }
+
+    @Test
+    void getFileFormat_returnsExcel() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.EXCEL);
     }
 
     @Test

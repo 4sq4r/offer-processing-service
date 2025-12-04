@@ -1,6 +1,7 @@
 package kz.offerprocessservice.file.templating.impl;
 
 import kz.offerprocessservice.file.templating.FileTemplatingStrategy;
+import kz.offerprocessservice.model.enums.FileFormat;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -8,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -16,9 +18,18 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import static kz.offerprocessservice.model.enums.FileFormat.EXCEL;
-import static kz.offerprocessservice.util.FileUtils.*;
+import static kz.offerprocessservice.util.FileUtils.OFFER_CODE;
+import static kz.offerprocessservice.util.FileUtils.OFFER_NAME;
+import static kz.offerprocessservice.util.FileUtils.createCellAndValue;
+import static kz.offerprocessservice.util.FileUtils.getContentDisposition;
 
+@Component
 public class ExcelTemplatingStrategyImpl implements FileTemplatingStrategy {
+
+    @Override
+    public FileFormat getFileFormat() {
+        return FileFormat.EXCEL;
+    }
 
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) throws IOException {

@@ -48,8 +48,8 @@ public class PriceListService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateOne(PriceListEntity priceListEntity) {
-        priceListRepository.save(priceListEntity);
+    public PriceListEntity updateOne(PriceListEntity priceListEntity) {
+        return priceListRepository.save(priceListEntity);
     }
 
     public PriceListStatus getCurrentState(String id) {

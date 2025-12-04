@@ -2,6 +2,8 @@ package kz.offerprocessservice.file.processing.impl;
 
 import kz.offerprocessservice.file.processing.AbstractProcessingStrategyTest;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
+import kz.offerprocessservice.model.enums.FileFormat;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
@@ -18,6 +20,12 @@ class XmlProcessingStrategyImplTest extends AbstractProcessingStrategyTest<XmlPr
     @Override
     protected XmlProcessingStrategyImpl createStrategy() {
         return new XmlProcessingStrategyImpl();
+    }
+
+    @Test
+    void getFileFormat_returnsXml() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.XML);
     }
 
     @Test
@@ -46,7 +54,10 @@ class XmlProcessingStrategyImplTest extends AbstractProcessingStrategyTest<XmlPr
 
         assertBasicExtraction(result, 1);
 
-        PriceListItemDTO item1 = result.stream().filter(i -> i.getOfferCode().equals("code1")).findFirst().orElseThrow();
+        PriceListItemDTO item1 = result.stream()
+                .filter(i -> i.getOfferCode().equals("code1"))
+                .findFirst()
+                .orElseThrow();
 
         assertThat(item1.getOfferName()).isEqualTo("name1");
         assertThat(item1.getStocks()).containsExactlyInAnyOrderEntriesOf(Map.of("StockA", 10, "StockB", 20));

@@ -1,6 +1,8 @@
 package kz.offerprocessservice.file.validation.impl;
 
 import kz.offerprocessservice.file.validation.AbstractValidationStrategyTest;
+import kz.offerprocessservice.model.enums.FileFormat;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -12,6 +14,12 @@ class CsvValidationStrategyImplTest extends AbstractValidationStrategyTest<CsvVa
     @Override
     protected CsvValidationStrategyImpl createStrategy() {
         return new CsvValidationStrategyImpl();
+    }
+
+    @Test
+    void getFileFormat_returnsCSV() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.CSV);
     }
 
     @Test

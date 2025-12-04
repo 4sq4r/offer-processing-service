@@ -13,13 +13,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Set;
 
+import static kz.offerprocessservice.model.enums.FileFormat.XML;
+
 @Slf4j
+@Component
 public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
+
+    @Override
+    public FileFormat getFileFormat() {
+        return XML;
+    }
+
     @Override
     public ResponseEntity<byte[]> generate(Set<String> warehouseNames) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -30,13 +40,13 @@ public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
             offer.setOfferName("Put your offer name here");
             offer.setOfferCode("Put your offer code here");
             offer.setStocks(warehouseNames.stream()
-                    .map(warehouseName -> {
-                        XmlStock stock = new XmlStock();
-                        stock.setStock(0);
-                        stock.setWarehouseName(warehouseName);
+                                    .map(warehouseName -> {
+                                        XmlStock stock = new XmlStock();
+                                        stock.setStock(0);
+                                        stock.setWarehouseName(warehouseName);
 
-                        return stock;
-                    }).toList());
+                                        return stock;
+                                    }).toList());
             template.setOffers(List.of(offer));
             JAXBContext context = JAXBContext.newInstance(XmlPriceListTemplate.class);
             Marshaller marshaller = context.createMarshaller();
@@ -47,7 +57,7 @@ public class XmlTemplatingStrategyImpl implements FileTemplatingStrategy {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, FileUtils.getContentDisposition(FileFormat.XML));
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, FileUtils.getContentDisposition(XML));
 
         return ResponseEntity.ok()
                 .headers(headers)

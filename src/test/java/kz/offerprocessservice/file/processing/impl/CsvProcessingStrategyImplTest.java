@@ -2,6 +2,7 @@ package kz.offerprocessservice.file.processing.impl;
 
 import kz.offerprocessservice.file.processing.AbstractProcessingStrategyTest;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
+import kz.offerprocessservice.model.enums.FileFormat;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -16,6 +17,12 @@ class CsvProcessingStrategyImplTest extends AbstractProcessingStrategyTest<CsvPr
     @Override
     protected CsvProcessingStrategyImpl createStrategy() {
         return new CsvProcessingStrategyImpl();
+    }
+
+    @Test
+    void getFileFormat_returnsCSV() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        assertThat(fileFormat).isEqualTo(FileFormat.CSV);
     }
 
     @Test

@@ -1,18 +1,28 @@
 package kz.offerprocessservice.file.validation.impl;
 
 import kz.offerprocessservice.file.validation.FileValidationStrategy;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.util.FileUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import static kz.offerprocessservice.model.enums.FileFormat.EXCEL;
+
+@Component
 public class ExcelValidationStrategyImpl implements FileValidationStrategy {
+
+    @Override
+    public FileFormat getFileFormat() {
+        return EXCEL;
+    }
 
     @Override
     public boolean validate(InputStream inputStream, Set<String> warehouseNames) throws IOException {

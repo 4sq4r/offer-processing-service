@@ -2,28 +2,30 @@ package kz.offerprocessservice.service.statemachine.action.impl;
 
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.PriceListStatus;
-import kz.offerprocessservice.model.entity.PriceListEntity;
 import kz.offerprocessservice.service.PriceListService;
 import kz.offerprocessservice.service.rabbit.producer.PriceListProcessingProducer;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component(ActionNames.VALIDATION_SUCCESS)
-@RequiredArgsConstructor
 public class ValidationSuccessAction extends PriceListAction {
 
     private final PriceListProcessingProducer priceListProcessingProducer;
-    private final PriceListService priceListService;
+
+    public ValidationSuccessAction(
+            PriceListService priceListService,
+            PriceListProcessingProducer priceListProcessingProducer
+    ) {
+        super(priceListService);
+        this.priceListProcessingProducer = priceListProcessingProducer;
+    }
 
     @Override
     public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
-        PriceListEntity ple = priceListService.findEntityById(priceListId);
-        ple.setStatus(PriceListStatus.VALIDATED);
-        priceListService.updateOne(ple);
+        updatePriceListStatus(priceListId, PriceListStatus.VALIDATED);
         priceListProcessingProducer.sendToProcessing(priceListId);
     }
 }

@@ -2,6 +2,8 @@ package kz.offerprocessservice.file.templating.impl;
 
 
 import kz.offerprocessservice.file.templating.AbstractTemplatingStrategyTest;
+import kz.offerprocessservice.model.enums.FileFormat;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
@@ -17,6 +19,13 @@ class CsvTemplatingStrategyImplTest extends AbstractTemplatingStrategyTest<CsvTe
     protected CsvTemplatingStrategyImpl createStrategy() {
         return new CsvTemplatingStrategyImpl();
     }
+
+    @Test
+    void getFileFormat_returnsCSV() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.CSV);
+    }
+
 
     @Test
     void generate_createsCsvTemplate() {

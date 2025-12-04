@@ -1,6 +1,8 @@
 package kz.offerprocessservice.file.validation.impl;
 
 import kz.offerprocessservice.file.validation.AbstractValidationStrategyTest;
+import kz.offerprocessservice.model.enums.FileFormat;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -14,6 +16,12 @@ class XmlValidationStrategyImplTest extends AbstractValidationStrategyTest<XmlVa
     @Override
     protected XmlValidationStrategyImpl createStrategy() {
         return new XmlValidationStrategyImpl();
+    }
+
+    @Test
+    void getFileFormat_returnsXml() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.XML);
     }
 
     @Test

@@ -24,7 +24,7 @@ class ValidationSuccessActionTest extends AbstractPriceListActionTest<Validation
 
     @Override
     protected ValidationSuccessAction createAction() {
-        return new ValidationSuccessAction(producer, priceListService);
+        return new ValidationSuccessAction(priceListService, producer);
     }
 
     @Test

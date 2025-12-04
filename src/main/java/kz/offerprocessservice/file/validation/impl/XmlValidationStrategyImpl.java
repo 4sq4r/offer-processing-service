@@ -4,16 +4,27 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import kz.offerprocessservice.file.validation.FileValidationStrategy;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.model.xml.XmlOffer;
 import kz.offerprocessservice.model.xml.XmlPriceListTemplate;
 import kz.offerprocessservice.model.xml.XmlStock;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static kz.offerprocessservice.model.enums.FileFormat.XML;
+
+@Component
 public class XmlValidationStrategyImpl implements FileValidationStrategy {
+
+    @Override
+    public FileFormat getFileFormat() {
+        return XML;
+    }
+
     @Override
     public boolean validate(InputStream inputStream, Set<String> warehouseNames) throws IOException {
         try {

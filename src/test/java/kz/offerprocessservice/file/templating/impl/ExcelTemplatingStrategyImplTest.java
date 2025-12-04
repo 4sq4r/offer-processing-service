@@ -1,7 +1,9 @@
 package kz.offerprocessservice.file.templating.impl;
 
 import kz.offerprocessservice.file.templating.AbstractTemplatingStrategyTest;
+import kz.offerprocessservice.model.enums.FileFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
@@ -20,12 +22,19 @@ class ExcelTemplatingStrategyImplTest extends AbstractTemplatingStrategyTest<Exc
     }
 
     @Test
+    void getFileFormat_returnsExcel() {
+        FileFormat fileFormat = strategy.getFileFormat();
+        AssertionsForInterfaceTypes.assertThat(fileFormat).isEqualTo(FileFormat.EXCEL);
+    }
+
+    @Test
     void generate_createsExcelTemplate() throws IOException {
         ResponseEntity<byte[]> response = strategy.generate(warehouseNames);
 
         assertBasicResponse(response, APPLICATION_OCTET_STREAM_VALUE);
 
-        try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(Objects.requireNonNull(response.getBody())))) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook(
+                new ByteArrayInputStream(Objects.requireNonNull(response.getBody())))) {
             assertThat(workbook.getNumberOfSheets()).isEqualTo(1);
 
             var sheet = workbook.getSheetAt(0);

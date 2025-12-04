@@ -2,19 +2,34 @@ package kz.offerprocessservice.file.processing.impl;
 
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
+import kz.offerprocessservice.model.enums.FileFormat;
 import kz.offerprocessservice.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import static kz.offerprocessservice.model.enums.FileFormat.EXCEL;
 
 @Slf4j
+@Component
 public class ExcelProcessingStrategyImpl implements FileProcessingStrategy {
+
+    @Override
+    public FileFormat getFileFormat() {
+        return EXCEL;
+    }
+
     @Override
     public Set<PriceListItemDTO> extract(InputStream inputStream) throws IOException {
         try (Workbook wb = new XSSFWorkbook(inputStream)) {
