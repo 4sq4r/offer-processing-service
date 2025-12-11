@@ -25,7 +25,9 @@ jobs:
           --health-retries 5
 
       minio:
-        image: minio/minio
+        image: bitnami/minio
+        volumes:
+          - 'minio_data:/data'
         ports:
           - 9000:9000
         options: >-
