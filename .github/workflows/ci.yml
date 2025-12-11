@@ -10,7 +10,6 @@ permissions:
   checks: write
 
 jobs:
-
   build-and-test:
     runs-on: ubuntu-latest
     strategy:

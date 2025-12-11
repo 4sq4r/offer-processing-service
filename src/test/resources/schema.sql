@@ -1,3 +1,14 @@
+drop table if exists warehouses cascade;
+create table warehouses
+(
+    id         varchar(36) not null primary key,
+    name       varchar(255) not null,
+    merchant_id varchar(36) not null references merchants (id),
+    city_id varchar(36) not null references cities (id),
+    created_at timestamp,
+    updated_at timestamp
+);
+
 drop table if exists cities cascade;
 create table cities
 (
@@ -15,19 +26,3 @@ create table merchants
     created_at timestamp,
     updated_at timestamp
 );
-
-drop table if exists warehouses cascade;
-create table warehouses
-(
-    id         varchar(36) not null primary key,
-    name       varchar(255) not null,
-    merchant_id varchar(36) not null references merchants (id),
-    city_id varchar(36) not null references cities (id),
-    created_at timestamp,
-    updated_at timestamp
-);
-
-
-
-
-

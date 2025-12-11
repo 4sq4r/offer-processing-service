@@ -1,6 +1,5 @@
 package kz.offerprocessservice.contoller;
 
-import kz.offerprocessservice.facade.CityFacade;
 import kz.offerprocessservice.model.dto.CityDTO;
 import kz.offerprocessservice.model.dto.ErrorResponseDTO;
 import kz.offerprocessservice.model.entity.CityEntity;
@@ -35,8 +34,8 @@ class CityControllerTest extends AbstractControllerTest {
 
     @AfterEach
     void afterEach() {
-        warehouseRepository.deleteAll();
         cityRepository.deleteAll();
+        warehouseRepository.deleteAll();
     }
 
     @Test

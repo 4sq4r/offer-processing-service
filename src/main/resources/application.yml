@@ -16,10 +16,6 @@ spring:
     defer-datasource-initialization: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-  sql:
-    init:
-      mode: always
-      data-locations: classpath:data.sql
   rabbit:
     host: localhost
     port: 5672
