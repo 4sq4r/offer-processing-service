@@ -73,7 +73,4 @@ jobs:
         with:
           name: JUnit Tests
           path: build/test-results/test/*.xml
-          reporter: java-junit
-
-volumes:
-  minio_data:
+          reporter: java-junit d
