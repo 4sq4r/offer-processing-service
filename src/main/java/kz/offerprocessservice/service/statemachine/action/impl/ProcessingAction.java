@@ -26,10 +26,11 @@ import java.util.Set;
 public class ProcessingAction extends PriceListAction {
 
     private final StockProcessor stockProcessor;
+    private final OfferProcessor offerProcessor;
     private final MerchantService merchantService;
     private final FileStrategyProviderImpl fileStrategyProvider;
     private final MinioService minioService;
-    private final OfferProcessor offerProcessor;
+
 
     public ProcessingAction(
             PriceListService priceListService,
