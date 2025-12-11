@@ -25,7 +25,7 @@ jobs:
 #          --health-retries 5
 #
       minio:
-        image: docker.io/bitnami/minio:latest
+        image: minio/minio:latest
         volumes:
           - 'minio_data:/data'
         ports:
