@@ -73,5 +73,3 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
-      - uses: github/dependency-submission-action@v2
