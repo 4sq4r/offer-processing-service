@@ -13,17 +13,16 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     services:
-#      rabbitmq:
-#        image: rabbitmq:3-management
-#        ports:
-#          - 5672:5672
-#          - 15672:15672
-#        options: >-
-#          --health-cmd "rabbitmqctl status"
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-#
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmqctl status"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       minio:
         image: minio/minio:latest
         volumes:
