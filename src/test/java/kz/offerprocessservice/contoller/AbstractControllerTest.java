@@ -2,7 +2,6 @@ package kz.offerprocessservice.contoller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kz.offerprocessservice.model.dto.BaseDTO;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -38,7 +36,6 @@ import static org.testcontainers.containers.wait.strategy.Wait.forLogMessage;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@TestPropertySource(locations = "classpath:application-test.yml")
 public abstract class AbstractControllerTest {
 
     protected static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -66,7 +63,6 @@ public abstract class AbstractControllerTest {
                     .withEnv("MINIO_ROOT_USER", "root")
                     .withEnv("MINIO_ROOT_PASSWORD", "az2RGrBK08LV")
                     .withCommand("server /data");
-
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
