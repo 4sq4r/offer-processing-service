@@ -36,22 +36,24 @@ jobs:
         env:
           MINIO_ROOT_USER: root
           MINIO_ROOT_PASSWORD: az2RGrBK08LV
-        command: server /data
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v3
-
-      - name: Start Docker daemon
-        run: |
-          sudo systemctl start docker
-          docker info
       - uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew build --no-daemon
+      - name: Build and test
+        run: ./gradlew build --no-daemon
+        env:
+          SPRING_RABBITMQ_HOST: localhost
+          SPRING_RABBITMQ_PORT: 5672
+          SPRING_RABBITMQ_USERNAME: guest
+          SPRING_RABBITMQ_PASSWORD: guest
+          MINIO_URL: http://localhost:9000
+          MINIO_BUCKET: offer-processing
+          MINIO_ACCESS_KEY: root
+          MINIO_SECRET_KEY: az2RGrBK08LV
 
       - uses: dorny/test-reporter@v1
         if: always()
