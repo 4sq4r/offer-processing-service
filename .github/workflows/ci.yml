@@ -26,8 +26,9 @@ jobs:
         run: ./gradlew build --no-daemon
 
       - uses: dorny/test-reporter@v1
-        if: always()
+        if: github.event_name != 'pull_request' || github.repository == github.event.pull_request.head.repo.full_name
         with:
           name: JUnit Tests
           path: build/test-results/test/*.xml
           reporter: java-junit
+          token: ${{ secrets.PERSONAL}}
