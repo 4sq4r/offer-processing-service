@@ -24,20 +24,23 @@ configurations {
 repositories {
     mavenCentral()
 }
+ext {
+
+}
 
 dependencies {
-    def springBootStarterVersion = '4.0.0'
     def stateMachineVersion = '4.0.1'
     def mapstructVersion = '1.6.3'
     def lombokVersion = '1.18.42'
     def poiVersion = '5.3.0'
     def minioVersion = '8.5.14'
+    def testContainersVersion = '1.21.3'
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:' + springBootStarterVersion
-    implementation 'org.springframework.boot:spring-boot-starter-validation:' + springBootStarterVersion
-    implementation 'org.springframework.boot:spring-boot-starter-web:' + springBootStarterVersion
-    implementation 'org.springframework.boot:spring-boot-starter-amqp:' + springBootStarterVersion
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:' + springBootStarterVersion
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     compileOnly 'org.projectlombok:lombok:' + lombokVersion
     annotationProcessor 'org.projectlombok:lombok:' + lombokVersion
     implementation 'org.mapstruct:mapstruct:' + mapstructVersion
@@ -52,6 +55,11 @@ dependencies {
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'org.springframework:spring-messaging'
     testImplementation 'org.instancio:instancio-junit:5.2.1'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    testImplementation "org.testcontainers:junit-jupiter:1.21.3"
+    testImplementation 'org.testcontainers:postgresql:' + testContainersVersion
+    testImplementation 'org.testcontainers:minio:' + testContainersVersion
 }
 
 tasks.named('test') {
