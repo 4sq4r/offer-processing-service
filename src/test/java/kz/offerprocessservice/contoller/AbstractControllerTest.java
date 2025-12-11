@@ -45,7 +45,6 @@ public abstract class AbstractControllerTest {
     private static final String POSTGRES_IMAGE_NAME = "postgres:17";
     private static final String TEST = "test";
     private static final String MINIO_IMAGE_NAME = "minio/minio:RELEASE.2025-09-07T16-13-09Z";
-
     private static final int MINIO_PORT = 9000;
 
     @Autowired
@@ -80,15 +79,9 @@ public abstract class AbstractControllerTest {
     }
 
     @Test
-    void testMinioIsRunning() {
-        String endpoint = "http://" + minio.getHost() + ":" + minio.getMappedPort(MINIO_PORT);
-        System.out.println("Minio endpoint: " + endpoint);
-        assertTrue(minio.isRunning());
-    }
-
-    @Test
     void contextLoads() {
         assertNotNull(container.getJdbcUrl());
+        assertTrue(minio.isRunning());
     }
 
     protected <T extends BaseDTO> MvcResult sendPostRequest(String url, T body, ResultMatcher expectedStatus) {
