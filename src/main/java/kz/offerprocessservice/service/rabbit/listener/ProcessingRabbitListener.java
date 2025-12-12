@@ -1,6 +1,6 @@
 package kz.offerprocessservice.service.rabbit.listener;
 
-import kz.offerprocessservice.configuration.RabbitConfiguration;
+import kz.offerprocessservice.configuration.rabbit.RabbitConfiguration;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.dto.rabbit.RabbitMessage;

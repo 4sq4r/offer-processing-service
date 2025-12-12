@@ -41,32 +41,6 @@ public abstract class PriceListAction implements Action<PriceListStatus, PriceLi
 
     protected abstract void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context);
 
-    protected PriceListEntity updatePriceListStatus(PriceListEntity priceListEntity, PriceListStatus priceListStatus) {
-        updateStatusAndUpdatedAt(priceListEntity, priceListStatus);
-        return priceListService.updateOne(priceListEntity);
-    }
-
-    protected PriceListEntity updatePriceListStatus(
-            PriceListEntity priceListEntity,
-            PriceListStatus priceListStatus,
-            String failReason
-    ) {
-        updateStatusAndUpdatedAt(priceListEntity, priceListStatus);
-        priceListEntity.setFailReason(failReason);
-        return priceListService.updateOne(priceListEntity);
-    }
-
-    protected PriceListEntity updatePriceListStatus(
-            String priceListId,
-            PriceListStatus status,
-            String failReason
-    ) {
-        PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
-        updateStatusAndUpdatedAt(priceListEntity, status);
-        priceListEntity.setFailReason(failReason);
-        return priceListService.updateOne(priceListEntity);
-    }
-
     protected PriceListEntity updatePriceListStatus(String priceListId, PriceListStatus status) {
         PriceListEntity priceListEntity = priceListService.findEntityById(priceListId);
         updateStatusAndUpdatedAt(priceListEntity, status);

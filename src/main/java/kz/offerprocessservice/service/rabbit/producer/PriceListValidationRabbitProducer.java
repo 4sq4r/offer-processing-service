@@ -1,16 +1,16 @@
 package kz.offerprocessservice.service.rabbit.producer;
 
 import kz.offerprocessservice.model.dto.rabbit.RabbitMessage;
-import kz.offerprocessservice.model.dto.rabbit.ResultMessage;
+import kz.offerprocessservice.model.dto.rabbit.ValidationResultMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import static kz.offerprocessservice.configuration.RabbitConfiguration.VALIDATION_EXCHANGE;
-import static kz.offerprocessservice.configuration.RabbitConfiguration.VALIDATION_RESULT_EXCHANGE;
-import static kz.offerprocessservice.configuration.RabbitConfiguration.VALIDATION_RESULT_ROUTING_KEY;
-import static kz.offerprocessservice.configuration.RabbitConfiguration.VALIDATION_ROUTING_KEY;
+import static kz.offerprocessservice.configuration.rabbit.RabbitConfiguration.VALIDATION_EXCHANGE;
+import static kz.offerprocessservice.configuration.rabbit.RabbitConfiguration.VALIDATION_RESULT_EXCHANGE;
+import static kz.offerprocessservice.configuration.rabbit.RabbitConfiguration.VALIDATION_RESULT_ROUTING_KEY;
+import static kz.offerprocessservice.configuration.rabbit.RabbitConfiguration.VALIDATION_ROUTING_KEY;
 
 @Slf4j
 @Component
@@ -33,7 +33,7 @@ public class PriceListValidationRabbitProducer {
         template.convertAndSend(
                 VALIDATION_RESULT_EXCHANGE,
                 VALIDATION_RESULT_ROUTING_KEY,
-                new ResultMessage(priceListId, success)
+                new ValidationResultMessage(priceListId, success)
         );
     }
 }

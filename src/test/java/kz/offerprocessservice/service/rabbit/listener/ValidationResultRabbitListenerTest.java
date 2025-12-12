@@ -2,7 +2,7 @@ package kz.offerprocessservice.service.rabbit.listener;
 
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.dto.rabbit.ResultMessage;
+import kz.offerprocessservice.model.dto.rabbit.ValidationResultMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static util.Data.PRICE_LIST_ID;
 
-class ValidationResultRabbitListenerTest extends AbstractRabbitListenerTest<ValidationResultRabbitListener, ResultMessage> {
+class ValidationResultRabbitListenerTest extends AbstractRabbitListenerTest<ValidationResultRabbitListener, ValidationResultMessage> {
 
     @Override
     protected ValidationResultRabbitListener createListener() {
@@ -26,7 +26,7 @@ class ValidationResultRabbitListenerTest extends AbstractRabbitListenerTest<Vali
     }
 
     @Override
-    protected void handle(ResultMessage validationResultMessage) {
+    protected void handle(ValidationResultMessage validationResultMessage) {
         listener.handle(validationResultMessage);
     }
 
@@ -34,7 +34,7 @@ class ValidationResultRabbitListenerTest extends AbstractRabbitListenerTest<Vali
     @MethodSource("argumentsFor_handle")
     void handle(boolean isSuccess, PriceListEvent sendEvent, PriceListEvent neverSendEvent) throws CustomException {
         // given
-        ResultMessage message = new ResultMessage(PRICE_LIST_ID, isSuccess);
+        ValidationResultMessage message = new ValidationResultMessage(PRICE_LIST_ID, isSuccess);
         // when
         listener.handle(message);
         // then
@@ -54,7 +54,7 @@ class ValidationResultRabbitListenerTest extends AbstractRabbitListenerTest<Vali
     @Test
     void handle_throwsCustomException() throws CustomException {
         // given
-        ResultMessage message = new ResultMessage(PRICE_LIST_ID, true);
+        ValidationResultMessage message = new ValidationResultMessage(PRICE_LIST_ID, true);
         doThrow(new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "fail"))
                 .when(stateMachineService).sendEvent(PRICE_LIST_ID, PriceListEvent.VALIDATION_SUCCESS);
 

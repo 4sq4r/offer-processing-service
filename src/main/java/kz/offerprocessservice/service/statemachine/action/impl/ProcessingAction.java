@@ -2,6 +2,7 @@ package kz.offerprocessservice.service.statemachine.action.impl;
 
 import kz.offerprocessservice.file.FileStrategyProviderImpl;
 import kz.offerprocessservice.file.processing.FileProcessingStrategy;
+import kz.offerprocessservice.file.processing.ProcessingResultStatus;
 import kz.offerprocessservice.model.PriceListEvent;
 import kz.offerprocessservice.model.PriceListStatus;
 import kz.offerprocessservice.model.dto.PriceListItemDTO;
@@ -13,6 +14,7 @@ import kz.offerprocessservice.processor.StockProcessor;
 import kz.offerprocessservice.service.MerchantService;
 import kz.offerprocessservice.service.MinioService;
 import kz.offerprocessservice.service.PriceListService;
+import kz.offerprocessservice.service.rabbit.producer.PriceListProcessingProducer;
 import kz.offerprocessservice.service.statemachine.action.ActionNames;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.statemachine.StateContext;
@@ -30,6 +32,7 @@ public class ProcessingAction extends PriceListAction {
     private final MerchantService merchantService;
     private final FileStrategyProviderImpl fileStrategyProvider;
     private final MinioService minioService;
+    private final PriceListProcessingProducer priceListProcessingProducer;
 
     public ProcessingAction(
             PriceListService priceListService,
@@ -37,7 +40,8 @@ public class ProcessingAction extends PriceListAction {
             MerchantService merchantService,
             FileStrategyProviderImpl fileStrategyProvider,
             MinioService minioService,
-            OfferProcessor offerProcessor
+            OfferProcessor offerProcessor,
+            PriceListProcessingProducer priceListProcessingProducer
     ) {
         super(priceListService);
         this.stockProcessor = stockProcessor;
@@ -45,15 +49,17 @@ public class ProcessingAction extends PriceListAction {
         this.fileStrategyProvider = fileStrategyProvider;
         this.minioService = minioService;
         this.offerProcessor = offerProcessor;
+        this.priceListProcessingProducer = priceListProcessingProducer;
     }
 
     @Override
     public void doExecute(String priceListId, StateContext<PriceListStatus, PriceListEvent> context) {
         PriceListEntity priceListEntity = updatePriceListStatus(priceListId, PriceListStatus.PROCESSING);
-        parse(priceListEntity);
+        ProcessingResultStatus resultStatus = processFile(priceListEntity);
+        priceListProcessingProducer.sendProcessingResult(priceListId, resultStatus);
     }
 
-    private void parse(PriceListEntity priceListEntity) {
+    private ProcessingResultStatus processFile(PriceListEntity priceListEntity) {
         try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl())) {
             MerchantEntity merchantEntity = merchantService.findEntityById(priceListEntity.getMerchant().getId());
             FileProcessingStrategy fileProcessingStrategy = fileStrategyProvider.getProcessingStrategy(
@@ -62,41 +68,27 @@ public class ProcessingAction extends PriceListAction {
             Set<PriceListItemDTO> priceListItems = fileProcessingStrategy.extract(inputStream);
 
             if (priceListItems.isEmpty()) {
-                markAsProcessingFailed(priceListEntity, "Processing failed. Empty price list items.");
-                return;
+                return ProcessingResultStatus.FAIL;
             }
 
-            processPriceListItems(priceListItems, merchantEntity);
-            markAsProcessed(priceListEntity);
+            return processAndSaveStocks(priceListItems, merchantEntity)
+                    ? ProcessingResultStatus.SUCCESS
+                    : ProcessingResultStatus.FAIL;
         } catch (Exception e) {
-            markAsProcessingFailed(
-                    priceListEntity,
-                    "Failed to parse file: " + e.getMessage()
-            );
+            return ProcessingResultStatus.FAIL;
         }
     }
 
-    private void processPriceListItems(Set<PriceListItemDTO> priceListItems, MerchantEntity merchantEntity) {
+    private boolean processAndSaveStocks(Set<PriceListItemDTO> priceListItems, MerchantEntity merchantEntity) {
         Set<OfferEntity> offers = offerProcessor.saveOffers(priceListItems, merchantEntity);
         String merchantId = merchantEntity.getId();
 
         if (offers.isEmpty()) {
             log.warn("No offers found for merchant: {}", merchantId);
-            return;
+            return false;
         }
 
         stockProcessor.saveStocks(priceListItems, offers, merchantId);
-    }
-
-    private void markAsProcessed(PriceListEntity priceListEntity) {
-        updatePriceListStatus(priceListEntity.getId(), PriceListStatus.PROCESSED);
-    }
-
-    private void markAsProcessingFailed(PriceListEntity priceListEntity, String errorMessage) {
-        updatePriceListStatus(
-                priceListEntity.getId(),
-                PriceListStatus.PROCESSING_FAILED,
-                errorMessage
-        );
+        return true;
     }
 }

@@ -1,5 +1,6 @@
-package kz.offerprocessservice.configuration;
+package kz.offerprocessservice.configuration.rabbit;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Declarables;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class RabbitConfiguration {
 
     public static final String VALIDATION_EXCHANGE = "price-list.validation.exchange";
@@ -35,22 +37,18 @@ public class RabbitConfiguration {
     public Declarables priceListBindings() {
         return new Declarables(
                 new TopicExchange(VALIDATION_EXCHANGE, true, false),
-//                new Queue(VALIDATION_QUEUE, true),
                 new Queue(VALIDATION_QUEUE, false, false, true),
                 new Binding(VALIDATION_QUEUE, Binding.DestinationType.QUEUE, VALIDATION_EXCHANGE, VALIDATION_ROUTING_KEY, null),
 
                 new TopicExchange(VALIDATION_RESULT_EXCHANGE, true, false),
-//                new Queue(VALIDATION_RESULT_QUEUE, true),
                 new Queue(VALIDATION_RESULT_QUEUE, false, false, true),
                 new Binding(VALIDATION_RESULT_QUEUE, Binding.DestinationType.QUEUE, VALIDATION_RESULT_EXCHANGE, VALIDATION_RESULT_ROUTING_KEY, null),
 
                 new TopicExchange(PROCESSING_EXCHANGE, true, false),
-//                new Queue(PROCESSING_QUEUE, true),
                 new Queue(PROCESSING_QUEUE, false, false, true),
                 new Binding(PROCESSING_QUEUE, Binding.DestinationType.QUEUE, PROCESSING_EXCHANGE, PROCESSING_ROUTING_KEY, null),
 
                 new TopicExchange(PROCESSING_RESULT_EXCHANGE, true, false),
-//                new Queue(PROCESSING_RESULT_QUEUE, true),
                 new Queue(PROCESSING_RESULT_QUEUE, false, false, true),
                 new Binding(PROCESSING_RESULT_QUEUE, Binding.DestinationType.QUEUE, PROCESSING_RESULT_EXCHANGE, PROCESSING_RESULT_ROUTING_KEY, null)
         );

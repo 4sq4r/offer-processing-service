@@ -5,12 +5,13 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ResultMessage extends RabbitMessage {
+public class ValidationResultMessage extends RabbitMessage {
 
     private final boolean success;
 
-    public ResultMessage(String priceListId, boolean success) {
+    public ValidationResultMessage(String priceListId, boolean success) {
         super(priceListId);
         this.success = success;
     }
+
 }
