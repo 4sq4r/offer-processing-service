@@ -23,14 +23,14 @@ class PriceListProcessingProducerTest {
     private RabbitTemplate template;
 
     @InjectMocks
-    private PriceListProcessingProducer producer;
+    private PriceListProcessingProducer underTest;
 
     @Test
     void sendToProcessing_sendsMessage() {
         //when
         ArgumentCaptor<RabbitMessage> messageArgumentCaptor = ArgumentCaptor.forClass(RabbitMessage.class);
         //then
-        producer.sendToProcessing(PRICE_LIST_ID);
+        underTest.sendToProcessing(PRICE_LIST_ID);
         //when
         verify(template).convertAndSend(
                 eq(PROCESSING_EXCHANGE),

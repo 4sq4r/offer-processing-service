@@ -12,9 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -38,14 +35,6 @@ public class WarehouseProcessor {
 
     public WarehouseEntity getWarehouseById(String warehouseId) throws CustomException {
         return warehouseService.getOne(warehouseId);
-    }
-
-    public Set<WarehouseEntity> getAllWarehousesByMerchantId(String merchantId) {
-        if (!merchantService.existsById(merchantId)) {
-            return new HashSet<>();
-        }
-
-        return warehouseService.getAllWarehousesByMerchantId(merchantId);
     }
 
     public void deleteOne(String warehouseId) throws CustomException {

@@ -50,13 +50,9 @@ public class MerchantService {
         return name;
     }
 
-    public boolean existsById(String id) {
-        return repository.existsById(id);
-    }
-
     public MerchantEntity findEntityById(String id) {
         return repository.findById(id).orElseThrow(
-                () -> new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id))
+                () -> new CustomException(HttpStatus.NOT_FOUND, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(id))
         );
     }
 }

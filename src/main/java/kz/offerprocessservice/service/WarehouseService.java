@@ -71,7 +71,7 @@ public class WarehouseService {
     private WarehouseEntity findEntityById(String id) {
         return repository.findById(id).orElseThrow(
                 () -> new CustomException(
-                        HttpStatus.BAD_REQUEST,
+                        HttpStatus.NOT_FOUND,
                         ErrorMessageSource.POINT_OF_SALE_ALREADY_EXISTS.getText(id)
                 )
         );

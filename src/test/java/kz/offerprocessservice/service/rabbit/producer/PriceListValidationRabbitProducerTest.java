@@ -26,19 +26,18 @@ import static util.Data.PRICE_LIST_ID;
 @ExtendWith(MockitoExtension.class)
 class PriceListValidationRabbitProducerTest {
 
-
     @Mock
     private RabbitTemplate template;
 
     @InjectMocks
-    private PriceListValidationRabbitProducer producer;
+    private PriceListValidationRabbitProducer underTest;
 
     @Test
     void sendToValidation_sendsMessage() {
         //when
         ArgumentCaptor<RabbitMessage> messageArgumentCaptor = ArgumentCaptor.forClass(RabbitMessage.class);
         //then
-        producer.sendToValidation(PRICE_LIST_ID);
+        underTest.sendToValidation(PRICE_LIST_ID);
         //when
         verify(template).convertAndSend(
                 eq(VALIDATION_EXCHANGE),
@@ -57,7 +56,7 @@ class PriceListValidationRabbitProducerTest {
         ArgumentCaptor<ValidationResultMessage> messageArgumentCaptor = ArgumentCaptor.forClass(
                 ValidationResultMessage.class);
         //then
-        producer.sendValidationResult(PRICE_LIST_ID, success);
+        underTest.sendValidationResult(PRICE_LIST_ID, success);
         //when
         verify(template).convertAndSend(
                 eq(VALIDATION_RESULT_EXCHANGE),
