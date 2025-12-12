@@ -38,15 +38,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static util.Data.FILE_NAME;
+import static util.Data.FILE_URL;
+import static util.Data.MERCHANT_ID;
+import static util.Data.PRICE_LIST_ID;
+import static util.Data.WAREHOUSE_1_ID;
+import static util.Data.WAREHOUSE_2_ID;
 
 @ExtendWith(MockitoExtension.class)
 class PriceListProcessorTest {
 
-    private static final String ID = "ID";
-    private static final String MERCHANT_ID = "merchant-1";
-    private static final String PRICE_LIST_ID = "pl-123";
-    private static final String FILE_NAME = "file.xlsx";
-    private static final String FILE_URL = "http://minio/file.xlsx";
 
     @Mock
     private MinioService minioService;
@@ -78,21 +79,21 @@ class PriceListProcessorTest {
     @Test
     void uploadPriceList_throwsException_whenMerchantNotFound() throws CustomException {
         //given
-        when(merchantService.findEntityById(ID))
-                .thenThrow(new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(ID)));
+        when(merchantService.findEntityById(MERCHANT_ID))
+                .thenThrow(new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(MERCHANT_ID)));
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> underTest.uploadPriceList(ID, multipartFile));
+        CustomException exception = assertThrows(CustomException.class, () -> underTest.uploadPriceList(MERCHANT_ID, multipartFile));
         //then
         assertThat(exception).isNotNull();
         assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getMessage()).isEqualTo(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(ID));
+        assertThat(exception.getMessage()).isEqualTo(ErrorMessageSource.MERCHANT_NOT_FOUND.getText(MERCHANT_ID));
         verify(minioService, never()).uploadFile(any());
         verify(priceListService, never()).savePriceList(any(), any(), any(), any(), any());
         verify(priceListValidationRabbitProducer, never()).sendToValidation(any());
     }
 
     @Test
-    void uploadPriceList_success() throws Exception {
+    void uploadPriceList_success() {
         // given
         MerchantEntity merchant = new MerchantEntity();
         merchant.setId(MERCHANT_ID);
@@ -119,7 +120,7 @@ class PriceListProcessorTest {
     @Test
     void downloadTemplate_success() throws Exception {
         // given
-        Set<String> warehouseNames = Set.of("WH1", "WH2");
+        Set<String> warehouseNames = Set.of(WAREHOUSE_1_ID, WAREHOUSE_2_ID);
         when(warehouseService.getAllWarehouseNamesByMerchantId(MERCHANT_ID)).thenReturn(warehouseNames);
         when(fileStrategyProvider.getTemplatingStrategy(FileFormat.EXCEL)).thenReturn(templatingStrategy);
         ResponseEntity<byte[]> response = ResponseEntity.ok("test".getBytes());
@@ -136,14 +137,14 @@ class PriceListProcessorTest {
 
         Set<String> captured = captor.getValue();
         assertEquals(2, captured.size());
-        assertTrue(captured.contains("WH1"));
-        assertTrue(captured.contains("WH2"));
+        assertTrue(captured.contains(WAREHOUSE_1_ID));
+        assertTrue(captured.contains(WAREHOUSE_2_ID));
     }
 
     @Test
     void downloadTemplate_throwsJaxbException() throws Exception {
         // given
-        when(warehouseService.getAllWarehouseNamesByMerchantId(MERCHANT_ID)).thenReturn(Set.of("WH1"));
+        when(warehouseService.getAllWarehouseNamesByMerchantId(MERCHANT_ID)).thenReturn(Set.of(WAREHOUSE_1_ID));
         when(fileStrategyProvider.getTemplatingStrategy(FileFormat.EXCEL)).thenReturn(templatingStrategy);
         when(templatingStrategy.generate(anySet())).thenThrow(new JAXBException("XML generation failed"));
         // when / then

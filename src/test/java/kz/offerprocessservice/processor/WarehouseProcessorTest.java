@@ -24,14 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static util.Data.CITY_ID;
+import static util.Data.MERCHANT_ID;
+import static util.Data.NAME;
+import static util.Data.WAREHOUSE_ID;
 
 @ExtendWith(MockitoExtension.class)
 class WarehouseProcessorTest {
 
-    private static final String WAREHOUSE_ID = "warehouseId";
-    private static final String NAME = "name";
-    private static final String MERCHANT_ID = "merchantId";
-    private static final String CITY_ID = "cityId";
     @Mock
     private WarehouseService warehouseService;
 
@@ -44,14 +44,14 @@ class WarehouseProcessorTest {
     @InjectMocks
     private WarehouseProcessor underTest;
 
-
     @Test
     void createWarehouse_throwsException_whenMerchantNotFound() {
         //given
         when(merchantService.findEntityById(MERCHANT_ID)).thenThrow(
                 new CustomException(HttpStatus.NOT_FOUND, ErrorMessageSource.MERCHANT_NOT_FOUND.getText(MERCHANT_ID)));
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> underTest.createWarehouse(NAME, MERCHANT_ID, CITY_ID));
+        CustomException exception = assertThrows(CustomException.class,
+                () -> underTest.createWarehouse(NAME, MERCHANT_ID, CITY_ID));
         //then
         assertNotNull(exception);
         assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
@@ -65,7 +65,8 @@ class WarehouseProcessorTest {
         when(cityService.findById(CITY_ID)).thenThrow(
                 new CustomException(HttpStatus.NOT_FOUND, ErrorMessageSource.CITY_NOT_FOUND.getText(CITY_ID)));
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> underTest.createWarehouse(NAME, MERCHANT_ID, CITY_ID));
+        CustomException exception = assertThrows(CustomException.class,
+                () -> underTest.createWarehouse(NAME, MERCHANT_ID, CITY_ID));
         //then
         assertNotNull(exception);
         assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
