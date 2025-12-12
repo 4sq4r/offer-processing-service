@@ -57,30 +57,12 @@ public class ValidationAction extends PriceListAction {
                 priceListEntity.getFormat()
         );
 
-        boolean validated;
         try (InputStream inputStream = minioService.getFile(priceListEntity.getUrl())) {
-            validated = validationStrategy.validate(inputStream, warehouseNames);
-
-            if (validated) {
-                updatePriceListStatus(priceListEntity, PriceListStatus.VALIDATED);
-            } else {
-                updatePriceListStatus(
-                        priceListEntity,
-                        PriceListStatus.VALIDATION_FAILED,
-                        "Incorrect warehouse names."
-                );
-            }
+            return validationStrategy.validate(inputStream, warehouseNames);
         } catch (Exception e) {
-            updatePriceListStatus(
-                    priceListEntity,
-                    PriceListStatus.VALIDATION_FAILED,
-                    "Unable to validate file: " + e.getMessage()
-            );
-            validated = false;
+            return false;
         }
-        return validated;
     }
-
 
     private Set<String> prepareWarehouseNames(PriceListEntity priceListEntity) {
         Set<String> warehouseNames = new HashSet<>(warehouseService.getAllWarehouseNamesByMerchantId(

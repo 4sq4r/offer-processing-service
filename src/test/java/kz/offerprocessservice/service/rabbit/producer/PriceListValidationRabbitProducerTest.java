@@ -1,7 +1,7 @@
 package kz.offerprocessservice.service.rabbit.producer;
 
 import kz.offerprocessservice.model.dto.rabbit.RabbitMessage;
-import kz.offerprocessservice.model.dto.rabbit.ValidationResultMessage;
+import kz.offerprocessservice.model.dto.rabbit.ResultMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,8 +53,8 @@ class PriceListValidationRabbitProducerTest {
     @MethodSource("argumentsFor_sendToValidationResult_sendsMessage")
     void sendToValidationResult_sendsMessage(boolean success) {
         //when
-        ArgumentCaptor<ValidationResultMessage> messageArgumentCaptor = ArgumentCaptor.forClass(
-                ValidationResultMessage.class);
+        ArgumentCaptor<ResultMessage> messageArgumentCaptor = ArgumentCaptor.forClass(
+                ResultMessage.class);
         //then
         underTest.sendValidationResult(PRICE_LIST_ID, success);
         //when
@@ -63,7 +63,7 @@ class PriceListValidationRabbitProducerTest {
                 eq(VALIDATION_RESULT_ROUTING_KEY),
                 messageArgumentCaptor.capture()
         );
-        ValidationResultMessage sendMessage = messageArgumentCaptor.getValue();
+        ResultMessage sendMessage = messageArgumentCaptor.getValue();
         assertThat(sendMessage).isNotNull();
         assertThat(sendMessage.getPriceListId()).isEqualTo(PRICE_LIST_ID);
         assertThat(sendMessage.isSuccess()).isEqualTo(success);

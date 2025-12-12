@@ -24,6 +24,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static util.Data.MERCHANT_ID;
+import static util.Data.WAREHOUSE_ID_1;
+import static util.Data.WAREHOUSE_ID_2;
+import static util.Data.WAREHOUSE_NAME_1;
+import static util.Data.WAREHOUSE_NAME_2;
 
 @ExtendWith(MockitoExtension.class)
 class StockProcessorTest {
@@ -40,11 +44,11 @@ class StockProcessorTest {
     @Test
     void saveStocks_savesCorrectStockEntities() {
         // given
-        WarehouseEntity wh1 = buildWarehouseEntity(Data.WAREHOUSE_1_ID);
-        WarehouseEntity wh2 =buildWarehouseEntity(Data.WAREHOUSE_2_ID);
+        WarehouseEntity wh1 = buildWarehouseEntity(WAREHOUSE_ID_1, WAREHOUSE_NAME_1);
+        WarehouseEntity wh2 = buildWarehouseEntity(WAREHOUSE_ID_2, WAREHOUSE_NAME_2);
         when(warehouseService.getAllWarehousesByMerchantId(MERCHANT_ID))
                 .thenReturn(Set.of(wh1, wh2));
-        PriceListItemDTO dto = buildPriceListItem(Data.OFFER_CODE, Map.of(Data.WAREHOUSE_1_ID, 10, Data.WAREHOUSE_2_ID, 20));
+        PriceListItemDTO dto = buildPriceListItem(Data.OFFER_CODE, Map.of(WAREHOUSE_NAME_1, 10, WAREHOUSE_NAME_2, 20));
         OfferEntity offer = buildOfferEntity();
         Set<PriceListItemDTO> dtoSet = Set.of(dto);
         Set<OfferEntity> offerSet = Set.of(offer);
@@ -58,12 +62,12 @@ class StockProcessorTest {
         assertThat(saved).hasSize(2);
         assertThat(saved)
                 .anySatisfy(stock -> {
-                    assertThat(stock.getWarehouse().getId()).isEqualTo(Data.WAREHOUSE_1_ID);
+                    assertThat(stock.getWarehouse().getId()).isEqualTo(WAREHOUSE_ID_1);
                     assertThat(stock.getStock()).isEqualTo(10);
                     assertThat(stock.getOffer()).isEqualTo(offer);
                 })
                 .anySatisfy(stock -> {
-                    assertThat(stock.getWarehouse().getId()).isEqualTo(Data.WAREHOUSE_2_ID);
+                    assertThat(stock.getWarehouse().getId()).isEqualTo(WAREHOUSE_ID_2);
                     assertThat(stock.getStock()).isEqualTo(20);
                     assertThat(stock.getOffer()).isEqualTo(offer);
                 });
@@ -85,7 +89,7 @@ class StockProcessorTest {
     @Test
     void saveStocks_throwsException_whenOfferNotFound() {
         // given
-        PriceListItemDTO dto = buildPriceListItem("unknown", Map.of(Data.WAREHOUSE_1_ID, 5));
+        PriceListItemDTO dto = buildPriceListItem("unknown", Map.of(WAREHOUSE_ID_1, 5));
         when(warehouseService.getAllWarehousesByMerchantId(MERCHANT_ID))
                 .thenReturn(Set.of());
         // when & then
@@ -95,9 +99,10 @@ class StockProcessorTest {
                 .hasMessage("Offer not found after saving");
     }
 
-    private WarehouseEntity buildWarehouseEntity(String id) {
+    private WarehouseEntity buildWarehouseEntity(String id, String name) {
         WarehouseEntity entity = new WarehouseEntity();
         entity.setId(id);
+        entity.setName(name);
 
         return entity;
     }

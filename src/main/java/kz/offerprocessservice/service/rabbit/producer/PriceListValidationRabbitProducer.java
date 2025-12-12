@@ -1,7 +1,7 @@
 package kz.offerprocessservice.service.rabbit.producer;
 
 import kz.offerprocessservice.model.dto.rabbit.RabbitMessage;
-import kz.offerprocessservice.model.dto.rabbit.ValidationResultMessage;
+import kz.offerprocessservice.model.dto.rabbit.ResultMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -33,7 +33,7 @@ public class PriceListValidationRabbitProducer {
         template.convertAndSend(
                 VALIDATION_RESULT_EXCHANGE,
                 VALIDATION_RESULT_ROUTING_KEY,
-                new ValidationResultMessage(priceListId, success)
+                new ResultMessage(priceListId, success)
         );
     }
 }

@@ -32,6 +32,13 @@ public class CityService {
         repository.delete(findById(id));
     }
 
+
+    public CityEntity findById(String id) {
+        return repository.findById(id).orElseThrow(
+                () -> new CustomException(HttpStatus.NOT_FOUND, ErrorMessageSource.CITY_NOT_FOUND.getText(id))
+        );
+    }
+
     private void validateCityName(String cityName) {
         if (cityName == null || cityName.trim().isEmpty()) {
             throw new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_NAME_IS_INVALID.getText(cityName));
@@ -46,11 +53,5 @@ public class CityService {
         if (repository.existsByNameIgnoreCase(name)) {
             throw new CustomException(HttpStatus.BAD_REQUEST, ErrorMessageSource.CITY_ALREADY_EXISTS.getText(name));
         }
-    }
-
-    public CityEntity findById(String id) {
-        return repository.findById(id).orElseThrow(
-                () -> new CustomException(HttpStatus.NOT_FOUND, ErrorMessageSource.CITY_NOT_FOUND.getText(id))
-        );
     }
 }

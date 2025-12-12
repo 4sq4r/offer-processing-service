@@ -7,6 +7,7 @@ import kz.offerprocessservice.model.entity.WarehouseEntity;
 import kz.offerprocessservice.service.StockService;
 import kz.offerprocessservice.service.WarehouseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class StockProcessor {
@@ -28,13 +30,14 @@ public class StockProcessor {
     ) {
         Map<String, WarehouseEntity> warehouseEntityMap = warehouseService.getAllWarehousesByMerchantId(merchantId)
                 .stream()
-                .collect(Collectors.toMap(WarehouseEntity::getId, wh -> wh));
+                .collect(Collectors.toMap(WarehouseEntity::getName, wh -> wh));
         Set<StockEntity> stockEntitySet = new HashSet<>();
         priceListItemDTOSet.forEach(item -> {
             OfferEntity offerEntity = offerEntitySet.stream()
                     .filter(offer -> offer.getOfferCode().equals(item.getOfferCode()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Offer not found after saving"));
+
             Map<String, Integer> stockMap = item.getStocks();
             stockMap.forEach((warehouseName, stockValue) -> {
                 WarehouseEntity warehouse = warehouseEntityMap.get(warehouseName);

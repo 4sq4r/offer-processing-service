@@ -3,7 +3,7 @@ package kz.offerprocessservice.service.rabbit.listener;
 import kz.offerprocessservice.configuration.RabbitConfiguration;
 import kz.offerprocessservice.exception.CustomException;
 import kz.offerprocessservice.model.PriceListEvent;
-import kz.offerprocessservice.model.dto.rabbit.ValidationResultMessage;
+import kz.offerprocessservice.model.dto.rabbit.ResultMessage;
 import kz.offerprocessservice.service.statemachine.PriceListStateMachineService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ public class ValidationResultRabbitListener extends AbstractPriceListRabbitListe
     }
 
     @RabbitListener(queues = RabbitConfiguration.VALIDATION_RESULT_QUEUE)
-    void handle(ValidationResultMessage message) throws CustomException {
+    void handle(ResultMessage message) throws CustomException {
         String id = message.getPriceListId();
         if (message.isSuccess()) {
             priceListStateMachineService.sendEvent(id, PriceListEvent.VALIDATION_SUCCESS);

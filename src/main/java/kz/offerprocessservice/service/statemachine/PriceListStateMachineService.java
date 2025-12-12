@@ -25,7 +25,7 @@ public class PriceListStateMachineService {
 
     public void sendEvent(String priceListId, PriceListEvent event) throws CustomException {
         PriceListStatus state = priceListService.getCurrentState(priceListId);
-        StateMachine<PriceListStatus, PriceListEvent> stateMachine = stateMachineFactory.getStateMachine();
+        StateMachine<PriceListStatus, PriceListEvent> stateMachine = stateMachineFactory.getStateMachine(priceListId);
         stateMachine.stopReactively().subscribe();
         stateMachine.getStateMachineAccessor()
                 .doWithAllRegions(access -> access.resetStateMachineReactively(

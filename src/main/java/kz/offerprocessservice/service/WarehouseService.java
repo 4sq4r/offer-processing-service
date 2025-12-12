@@ -7,6 +7,7 @@ import kz.offerprocessservice.model.entity.WarehouseEntity;
 import kz.offerprocessservice.repository.WarehouseRepository;
 import kz.offerprocessservice.util.ErrorMessageSource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +16,13 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class WarehouseService {
 
     private final WarehouseRepository repository;
 
-    @Transactional(rollbackFor = CustomException.class)
     public WarehouseEntity saveOne(
             String name,
             MerchantEntity merchantEntity,
@@ -33,7 +33,6 @@ public class WarehouseService {
         entity.setName(name.trim());
         entity.setMerchant(merchantEntity);
         entity.setCity(cityEntity);
-        entity.setName(name.trim());
 
         return repository.save(entity);
     }

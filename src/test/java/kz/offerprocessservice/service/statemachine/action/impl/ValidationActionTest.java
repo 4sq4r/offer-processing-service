@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import static kz.offerprocessservice.configuration.PriceListStateMachineConfiguration.PRICE_LIST_ID_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -66,11 +65,7 @@ class ValidationActionTest extends AbstractPriceListActionTest<ValidationAction>
 
     @ParameterizedTest
     @MethodSource("argumentsFor_execute_validated_updatesStatus")
-    void execute_validated_updatesStatus_updatesStatus(
-            FileFormat format,
-            boolean isValid,
-            PriceListStatus expectedStatus
-    ) throws IOException {
+    void execute_validated_updatesStatus_updatesStatus(FileFormat format, boolean isValid) throws IOException {
         // given
         PriceListEntity entity = buildPriceList(format);
         when(context.getMessageHeader(PRICE_LIST_ID_HEADER)).thenReturn(PRICE_LIST_ID);
@@ -88,24 +83,20 @@ class ValidationActionTest extends AbstractPriceListActionTest<ValidationAction>
         action.execute(context);
 
         // then
-        assertEquals(expectedStatus, entity.getStatus());
+        assertEquals(PriceListStatus.VALIDATION, entity.getStatus());
         verify(priceListService, atLeastOnce()).updateOne(entity);
         verify(priceListValidationRabbitProducer)
                 .sendValidationResult(PRICE_LIST_ID, isValid);
-
-        if (!isValid) {
-            assertEquals("Incorrect warehouse names.", entity.getFailReason());
-        }
     }
 
     private static Stream<Arguments> argumentsFor_execute_validated_updatesStatus() {
         return Stream.of(
-                Arguments.of(FileFormat.CSV, true, PriceListStatus.VALIDATED),
-                Arguments.of(FileFormat.CSV, false, PriceListStatus.VALIDATION_FAILED),
-                Arguments.of(FileFormat.XML, true, PriceListStatus.VALIDATED),
-                Arguments.of(FileFormat.XML, false, PriceListStatus.VALIDATION_FAILED),
-                Arguments.of(FileFormat.EXCEL, true, PriceListStatus.VALIDATED),
-                Arguments.of(FileFormat.EXCEL, false, PriceListStatus.VALIDATION_FAILED)
+                Arguments.of(FileFormat.CSV, true),
+                Arguments.of(FileFormat.CSV, false),
+                Arguments.of(FileFormat.XML, true),
+                Arguments.of(FileFormat.XML, false),
+                Arguments.of(FileFormat.EXCEL, true),
+                Arguments.of(FileFormat.EXCEL, false)
         );
     }
 
@@ -129,8 +120,7 @@ class ValidationActionTest extends AbstractPriceListActionTest<ValidationAction>
         // when
         action.execute(context);
         // then
-        assertEquals(PriceListStatus.VALIDATION_FAILED, entity.getStatus());
-        assertTrue(entity.getFailReason().contains("Unable to validate file: file not found"));
+        assertEquals(PriceListStatus.VALIDATION, entity.getStatus());
         verify(priceListService, atLeastOnce()).updateOne(entity);
         verify(priceListValidationRabbitProducer)
                 .sendValidationResult(PRICE_LIST_ID, false);

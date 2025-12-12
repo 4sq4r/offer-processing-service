@@ -31,7 +31,6 @@ public class ProcessingAction extends PriceListAction {
     private final FileStrategyProviderImpl fileStrategyProvider;
     private final MinioService minioService;
 
-
     public ProcessingAction(
             PriceListService priceListService,
             StockProcessor stockProcessor,

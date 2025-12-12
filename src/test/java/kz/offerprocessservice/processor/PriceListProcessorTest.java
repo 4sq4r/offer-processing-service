@@ -42,8 +42,8 @@ import static util.Data.FILE_NAME;
 import static util.Data.FILE_URL;
 import static util.Data.MERCHANT_ID;
 import static util.Data.PRICE_LIST_ID;
-import static util.Data.WAREHOUSE_1_ID;
-import static util.Data.WAREHOUSE_2_ID;
+import static util.Data.WAREHOUSE_ID_1;
+import static util.Data.WAREHOUSE_ID_2;
 
 @ExtendWith(MockitoExtension.class)
 class PriceListProcessorTest {
@@ -120,7 +120,7 @@ class PriceListProcessorTest {
     @Test
     void downloadTemplate_success() throws Exception {
         // given
-        Set<String> warehouseNames = Set.of(WAREHOUSE_1_ID, WAREHOUSE_2_ID);
+        Set<String> warehouseNames = Set.of(WAREHOUSE_ID_1, WAREHOUSE_ID_2);
         when(warehouseService.getAllWarehouseNamesByMerchantId(MERCHANT_ID)).thenReturn(warehouseNames);
         when(fileStrategyProvider.getTemplatingStrategy(FileFormat.EXCEL)).thenReturn(templatingStrategy);
         ResponseEntity<byte[]> response = ResponseEntity.ok("test".getBytes());
@@ -137,14 +137,14 @@ class PriceListProcessorTest {
 
         Set<String> captured = captor.getValue();
         assertEquals(2, captured.size());
-        assertTrue(captured.contains(WAREHOUSE_1_ID));
-        assertTrue(captured.contains(WAREHOUSE_2_ID));
+        assertTrue(captured.contains(WAREHOUSE_ID_1));
+        assertTrue(captured.contains(WAREHOUSE_ID_2));
     }
 
     @Test
     void downloadTemplate_throwsJaxbException() throws Exception {
         // given
-        when(warehouseService.getAllWarehouseNamesByMerchantId(MERCHANT_ID)).thenReturn(Set.of(WAREHOUSE_1_ID));
+        when(warehouseService.getAllWarehouseNamesByMerchantId(MERCHANT_ID)).thenReturn(Set.of(WAREHOUSE_ID_1));
         when(fileStrategyProvider.getTemplatingStrategy(FileFormat.EXCEL)).thenReturn(templatingStrategy);
         when(templatingStrategy.generate(anySet())).thenThrow(new JAXBException("XML generation failed"));
         // when / then

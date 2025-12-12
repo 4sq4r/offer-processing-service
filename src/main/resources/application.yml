@@ -16,6 +16,10 @@ spring:
     defer-datasource-initialization: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
   rabbit:
     host: localhost
     port: 5672
@@ -41,4 +45,3 @@ minio:
 logging:
   level:
     org.hibernate.orm.connections.pooling: error
-#    org.springframework.statemachine: DEBUG
