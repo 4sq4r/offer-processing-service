@@ -43,8 +43,9 @@ public class PriceListStateMachineConfiguration extends EnumStateMachineConfigur
     public void configure(StateMachineStateConfigurer<PriceListStatus, PriceListEvent> states) throws Exception {
         states.withStates()
                 .initial(PriceListStatus.UPLOADED)
-                .end(PriceListStatus.PROCESSED)
                 .end(PriceListStatus.VALIDATION_FAILED)
+                .end(PriceListStatus.PROCESSED)
+                .end(PriceListStatus.PARTIALLY_PROCESSED)
                 .end(PriceListStatus.PROCESSING_FAILED)
                 .states(EnumSet.allOf(PriceListStatus.class));
     }
@@ -52,49 +53,48 @@ public class PriceListStateMachineConfiguration extends EnumStateMachineConfigur
     @Override
     public void configure(StateMachineTransitionConfigurer<PriceListStatus, PriceListEvent> transitions)
             throws Exception {
-        transitions
-                .withExternal()
-                .source(PriceListStatus.UPLOADED)
-                .target(PriceListStatus.VALIDATION)
-                .event(PriceListEvent.START_VALIDATION)
-                .action(getAction(ActionNames.START_VALIDATION))
-                .and()
-                .withExternal()
-                .source(PriceListStatus.VALIDATION)
-                .target(PriceListStatus.VALIDATED)
-                .event(PriceListEvent.VALIDATION_SUCCESS)
-                .action(getAction(ActionNames.VALIDATION_SUCCESS))
-                .and()
-                .withExternal()
-                .source(PriceListStatus.VALIDATION)
-                .target(PriceListStatus.VALIDATION_FAILED)
-                .event(PriceListEvent.VALIDATION_ERROR)
-                .action(getAction(ActionNames.VALIDATION_ERROR))
-                .and()
-                .withExternal()
-                .source(PriceListStatus.VALIDATED)
-                .target(PriceListStatus.PROCESSING)
-                .event(PriceListEvent.START_PROCESSING)
-                .action(getAction(ActionNames.START_PROCESSING))
-                .and()
-                .withExternal()
-                .source(PriceListStatus.PROCESSING)
-                .target(PriceListStatus.PROCESSED)
-                .event(PriceListEvent.PROCESSING_SUCCESS)
-                .action(getAction(ActionNames.PROCESSED))
-                .and()
-                .withExternal()
-                .source(PriceListStatus.PROCESSING)
-                .target(PriceListStatus.PARTIALLY_PROCESSED)
-                .event(PriceListEvent.PROCESSING_PARTIALLY_SUCCESS)
-                .action(getAction(ActionNames.PARTIALLY_PROCESSED))
-                .and()
-                .withExternal()
-                .source(PriceListStatus.PROCESSING)
-                .target(PriceListStatus.PROCESSING_FAILED)
-                .event(PriceListEvent.PROCESSING_ERROR)
-                .action(getAction(ActionNames.PROCESSING_FAILED))
-        ;
+        configure(transitions,
+                PriceListStatus.UPLOADED,
+                PriceListStatus.VALIDATION,
+                PriceListEvent.START_VALIDATION,
+                ActionNames.START_VALIDATION
+        );
+        configure(transitions,
+                PriceListStatus.VALIDATION,
+                PriceListStatus.VALIDATED,
+                PriceListEvent.VALIDATION_SUCCESS,
+                ActionNames.VALIDATION_SUCCESS
+        );
+        configure(transitions,
+                PriceListStatus.VALIDATION,
+                PriceListStatus.VALIDATION_FAILED,
+                PriceListEvent.VALIDATION_ERROR,
+                ActionNames.VALIDATION_ERROR
+        );
+        configure(transitions,
+                PriceListStatus.VALIDATED,
+                PriceListStatus.PROCESSING,
+                PriceListEvent.START_PROCESSING,
+                ActionNames.START_PROCESSING
+        );
+        configure(transitions,
+                PriceListStatus.PROCESSING,
+                PriceListStatus.PROCESSED,
+                PriceListEvent.PROCESSING_SUCCESS,
+                ActionNames.PROCESSED
+        );
+        configure(transitions,
+                PriceListStatus.PROCESSING,
+                PriceListStatus.PARTIALLY_PROCESSED,
+                PriceListEvent.PROCESSING_PARTIALLY_SUCCESS,
+                ActionNames.PARTIALLY_PROCESSED
+        );
+        configure(transitions,
+                PriceListStatus.PROCESSING,
+                PriceListStatus.PROCESSING_FAILED,
+                PriceListEvent.PROCESSING_ERROR,
+                ActionNames.PROCESSING_FAILED
+        );
     }
 
     @Bean
@@ -121,5 +121,20 @@ public class PriceListStateMachineConfiguration extends EnumStateMachineConfigur
             log.error("Action not found: {}", actionName);
         }
         return action;
+    }
+
+    private void configure(
+            StateMachineTransitionConfigurer<PriceListStatus, PriceListEvent> transitions,
+            PriceListStatus source,
+            PriceListStatus target,
+            PriceListEvent event,
+            String action
+    ) throws Exception {
+        transitions.withExternal()
+                .source(source)
+                .target(target)
+                .event(event)
+                .action(getAction(action))
+                .and();
     }
 }
