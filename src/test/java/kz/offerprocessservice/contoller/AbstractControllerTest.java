@@ -14,6 +14,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -43,6 +44,8 @@ public abstract class AbstractControllerTest {
     private static final String TEST = "test";
     private static final String MINIO_IMAGE_NAME = "minio/minio:RELEASE.2025-09-07T16-13-09Z";
     private static final int MINIO_PORT = 9000;
+    private static final String MINIO_USER = "root";
+    private static final String MINIO_PASSWORD = "az2RGrBK08LV";
 
     @Autowired
     protected MockMvc mockMvc;
@@ -54,14 +57,15 @@ public abstract class AbstractControllerTest {
             .withUsername(TEST)
             .withPassword(TEST)
             .waitingFor(forLogMessage(".*database system is ready to accept connections.*\\n", 1)
-                    .withStartupTimeout(Duration.ofSeconds(60)));
+                                .withStartupTimeout(Duration.ofSeconds(60)));
 
     @Container
+    @SuppressWarnings("resource")
     static final GenericContainer<?> minio =
             new GenericContainer<>(DockerImageName.parse(MINIO_IMAGE_NAME))
                     .withExposedPorts(MINIO_PORT)
-                    .withEnv("MINIO_ROOT_USER", "root")
-                    .withEnv("MINIO_ROOT_PASSWORD", "az2RGrBK08LV")
+                    .withEnv("MINIO_ROOT_USER", MINIO_USER)
+                    .withEnv("MINIO_ROOT_PASSWORD", MINIO_PASSWORD)
                     .withCommand("server /data");
 
     @DynamicPropertySource
@@ -70,8 +74,8 @@ public abstract class AbstractControllerTest {
         registry.add("spring.datasource.username", container::getUsername);
         registry.add("spring.datasource.password", container::getPassword);
         registry.add("minio.url", () -> "http://" + minio.getHost() + ":" + minio.getMappedPort(9000));
-        registry.add("minio.access-key", () -> "root");
-        registry.add("minio.secret-key", () -> "az2RGrBK08LV");
+        registry.add("minio.access-key", () -> MINIO_USER);
+        registry.add("minio.secret-key", () -> MINIO_PASSWORD);
     }
 
     @Test
@@ -82,11 +86,10 @@ public abstract class AbstractControllerTest {
 
     protected <T extends BaseDTO> MvcResult sendPostRequest(String url, T body, ResultMatcher expectedStatus) {
         try {
-            return mockMvc.perform(MockMvcRequestBuilders.post(url)
-                            .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(body)))
-                    .andExpect(expectedStatus)
-                    .andReturn();
+            return sendRequest(
+                    MockMvcRequestBuilders.post(url)
+                            .content(objectMapper.writeValueAsString(body)), expectedStatus
+            );
         } catch (Exception e) {
             throw new RuntimeException("MockMvc POST request failed", e);
         }
@@ -94,12 +97,7 @@ public abstract class AbstractControllerTest {
 
     protected MvcResult sendGetRequest(String url, ResultMatcher expectedStatus) {
         try {
-            return mockMvc.perform(MockMvcRequestBuilders.get(url)
-                            .contentType(APPLICATION_JSON)
-                            .characterEncoding(UTF_8))
-                    .andExpect(expectedStatus)
-                    .andReturn();
-
+            return sendRequest(MockMvcRequestBuilders.get(url), expectedStatus);
         } catch (Exception e) {
             throw new RuntimeException("MockMvc GET request failed", e);
         }
@@ -107,11 +105,7 @@ public abstract class AbstractControllerTest {
 
     protected MvcResult sendDeleteRequest(String url, ResultMatcher expectedStatus) {
         try {
-            return mockMvc.perform(MockMvcRequestBuilders.delete(url)
-                            .contentType(APPLICATION_JSON)
-                            .characterEncoding(UTF_8))
-                    .andExpect(expectedStatus)
-                    .andReturn();
+            return sendRequest(MockMvcRequestBuilders.delete(url), expectedStatus);
         } catch (Exception e) {
             throw new RuntimeException("MockMvc DELETE request failed", e);
         }
@@ -120,6 +114,7 @@ public abstract class AbstractControllerTest {
     protected <T> T readMvcResultAsString(MvcResult mvcResult, Class<T> valueType) {
         try {
             String json = mvcResult.getResponse().getContentAsString(UTF_8);
+
             return objectMapper.readValue(json, valueType);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse MVC response", e);
@@ -133,11 +128,29 @@ public abstract class AbstractControllerTest {
                             .getContentAsString(), new TypeReference<HashMap<String, Object>>() {
                     }
             );
+
             assertNotNull(systemValues.get(Fields.ID));
             assertNotNull(systemValues.get(Fields.CREATED_AT));
             assertNotNull(systemValues.get(Fields.UPDATED_AT));
         } catch (Exception e) {
             throw new RuntimeException("Failed to assert system values from MvcResult", e);
+        }
+    }
+
+    private MvcResult sendRequest(
+            MockHttpServletRequestBuilder requestBuilder,
+            ResultMatcher expectedStatus
+    ) {
+        try {
+            return mockMvc.perform(
+                            requestBuilder
+                                    .contentType(APPLICATION_JSON)
+                                    .characterEncoding(UTF_8)
+                    )
+                    .andExpect(expectedStatus)
+                    .andReturn();
+        } catch (Exception e) {
+            throw new RuntimeException("MockMvc request failed", e);
         }
     }
 
